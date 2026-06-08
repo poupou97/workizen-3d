@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "source": "Synty Studios - POLYGON Town Pack",
+  "scale": 0.01,
+  "models": {
+    "tree_01": { "path": "/assets/models/SM_Generic_Tree_01.glb", "category": "environment", "yOffset": 0.13 },
+    "tree_02": { "path": "/assets/models/SM_Generic_Tree_02.glb", "category": "environment", "yOffset": 0.13 },
+    "tree_03": { "path": "/assets/models/SM_Generic_Tree_03.glb", "category": "environment", "yOffset": 0.13 },
+    "tree_04": { "path": "/assets/models/SM_Generic_Tree_04.glb", "category": "environment", "yOffset": 0.13 },
+    "bush_01": { "path": "/assets/models/SM_Env_Bush_01.glb", "category": "environment" },
+    "bush_02": { "path": "/assets/models/SM_Env_Bush_02.glb", "category": "environment" },
+    "flower_01": { "path": "/assets/models/SM_Env_FlowerPatch_01.glb", "category": "environment" },
+    "flower_02": { "path": "/assets/models/SM_Env_FlowerPatch_02.glb", "category": "environment" },
+    "bench": { "path": "/assets/models/SM_Prop_ParkBench_01.glb", "category": "prop" },
+    "streetlamp_01": { "path": "/assets/models/SM_Prop_Streetlamp_01.glb", "category": "prop", "scale": 0.007 },
+    "streetlamp_02": { "path": "/assets/models/SM_Prop_Streetlamp_02.glb", "category": "prop", "scale": 0.007 },
+    "building_house_01": { "path": "/assets/models/SM_Bld_House_Preset_01.glb", "category": "building" },
+    "building_house_02": { "path": "/assets/models/SM_Bld_House_Preset_02.glb", "category": "building" },
+    "building_house_03": { "path": "/assets/models/SM_Bld_House_Preset_03.glb", "category": "building" },
+    "building_shop_01": { "path": "/assets/models/SM_Bld_Shop_01.glb", "category": "building" },
+    "building_shop_02": { "path": "/assets/models/SM_Bld_Shop_02.glb", "category": "building" },
+    "building_shop_03": { "path": "/assets/models/SM_Bld_Shop_03.glb", "category": "building" }
+  },
+  "textures": {
+    "palette": "/assets/textures/PolygonTown_Texture_01_A.png"
+  }
+}
