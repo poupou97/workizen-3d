@@ -200,43 +200,73 @@ function SyntyModel({
 function TripoModel({
   path,
   scale = 1.0,
+  autoNorm = false,
   position,
   rotation,
   yOffset = 0,
 }: {
   path: string
   scale?: number
+  // When true: treat `scale` as target world height in metres, auto-normalize from bounding box.
+  // Use for Tripo characters — they embed a 100× node matrix that must not be hardcoded.
+  autoNorm?: boolean
   position: Vector3Tuple
   rotation?: [number, number, number]
   yOffset?: number
 }) {
   const { scene } = useGLTF(path)
 
-  const cloned = useMemo(() => {
+  const { cloned, effectiveScale, effectiveYOffset } = useMemo(() => {
     const copy = scene.clone(true)
+
+    // Normalize materials first
     copy.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         const mesh = child as THREE.Mesh
         mesh.castShadow = true
         mesh.receiveShadow = true
         const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
-        const normalized = materials.map((material) => {
-          const clonedMaterial = material.clone()
-          normalizeTripoMaterial(clonedMaterial)
-          return clonedMaterial
+        const normalized = materials.map((mat) => {
+          const m = mat.clone()
+          normalizeTripoMaterial(m)
+          return m
         })
         mesh.material = Array.isArray(mesh.material) ? normalized : normalized[0]
       }
     })
-    return copy
-  }, [scene])
+
+    if (!autoNorm) {
+      return { cloned: copy, effectiveScale: scale, effectiveYOffset: yOffset }
+    }
+
+    // Auto-normalize: measure real bounding box (includes embedded node transforms)
+    copy.updateMatrixWorld(true)
+    const box = new THREE.Box3().setFromObject(copy)
+    const size = new THREE.Vector3()
+    box.getSize(size)
+
+    const currentHeight = size.y
+    const targetHeight = scale  // `scale` prop = target height in metres when autoNorm=true
+    const scaleFactor = currentHeight > 0 ? targetHeight / currentHeight : 1
+
+    // Ground alignment: shift up so model bottom sits at y=0
+    const groundOffset = -box.min.y * scaleFactor
+
+    console.log(`[TripoModel] ${path.split("/").pop()}`)
+    console.log(`  Current Height: ${currentHeight.toFixed(4)}`)
+    console.log(`  Target Height:  ${targetHeight.toFixed(4)}`)
+    console.log(`  Scale Factor:   ${scaleFactor.toFixed(5)}`)
+    console.log(`  Ground Offset:  ${groundOffset.toFixed(4)}`)
+
+    return { cloned: copy, effectiveScale: scaleFactor, effectiveYOffset: groundOffset }
+  }, [scene, scale, autoNorm, yOffset, path])
 
   const [x, y, z] = position
   return (
     <primitive
       object={cloned}
-      scale={scale}
-      position={[x, y + yOffset, z]}
+      scale={effectiveScale}
+      position={[x, y + effectiveYOffset, z]}
       rotation={rotation ?? [0, 0, 0]}
     />
   )
@@ -1260,6 +1290,9 @@ function MeetingTable({ position, accent }: { position: Vector3Tuple; accent: st
 
 // ── Citizen Meshes ────────────────────────────────────────────────────────────
 
+// Target height in metres for all autoNorm citizens — must match scale={} prop on TripoModel
+const CITIZEN_TARGET_HEIGHT = 1.7
+
 const CITIZEN_MODELS_BY_TYPE: Record<string, { path: string; scale: number }> = {
   "agent-placeholder":         { path: "/assets/models/SM_Chr_RobotCitizen_01.glb",     scale: HEIGHT.ROBOT },
   "knowledge-placeholder":     { path: "/assets/models/SM_Chr_KnowledgeCitizen_01.glb", scale: HEIGHT.HUMAN },
@@ -1287,7 +1320,7 @@ function CitizenMesh({ citizen }: { citizen: CitizenManifest }) {
   const [x, , z] = citizen.location.coordinates;
   const isComputeDevice = citizen.avatar_type === "device-placeholder";
   const tripoModel = getCitizenModel(citizen);
-  const labelBaseY = isComputeDevice ? HEIGHT.DEVICE : (tripoModel ? tripoModel.scale + 0.2 : 1.35)
+  const labelBaseY = isComputeDevice ? HEIGHT.DEVICE : (tripoModel ? CITIZEN_TARGET_HEIGHT + 0.2 : 1.35)
   const typeColor = getCitizenTypeColor(citizen.citizen_type)
 
   return (
@@ -1309,13 +1342,7 @@ function CitizenMesh({ citizen }: { citizen: CitizenManifest }) {
             </mesh>
           </>
         ) : tripoModel ? (
-          // Static Tripo mesh — Float wrapper provides idle bobbing
-          <TripoModel
-            path={tripoModel.path}
-            position={[0, 0, 0]}
-            scale={tripoModel.scale}
-            yOffset={tripoModel.scale / 2}
-          />
+          <TripoModel path={tripoModel.path} scale={CITIZEN_TARGET_HEIGHT} autoNorm position={[0, 0, 0]} />
         ) : (
           // Fallback procedural human
           <>
@@ -1472,7 +1499,13 @@ function SceneContents() {
       {npcs.map((npc) => (
         <NpcMesh key={npc.id} npc={npc} />
       ))}
-      {/* DEBUG: citizens tạm ẩn */}
+      {/* DEBUG: chỉ render device-placeholder (procedural) + agent-placeholder (Robot) */}
+      {/* DEBUG: chỉ 1 placeholder citizen */}
+      {citizens
+        .filter(c => c.citizen_id === "human-plaza-01")
+        .map((citizen) => (
+          <CitizenMesh key={citizen.citizen_id} citizen={citizen} />
+        ))}
     </group>
   );
 }
