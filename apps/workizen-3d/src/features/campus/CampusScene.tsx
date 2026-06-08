@@ -1,7 +1,7 @@
 "use client";
 
 import { Float, OrbitControls, PerspectiveCamera, Text, useAnimations, useGLTF, useTexture } from "@react-three/drei";
-import { Canvas, ThreeEvent } from "@react-three/fiber";
+import { Canvas, ThreeEvent, useFrame } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { clone as cloneSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js";
@@ -520,10 +520,7 @@ function PlazaDetails() {
       {/* Benches */}
       {(
         [
-          [-2.2, 0, -1.4, Math.PI / 2],
-          [2.2, 0, -1.4, -Math.PI / 2],
-          [-2.2, 0, 1.35, Math.PI / 2],
-          [2.2, 0, 1.35, -Math.PI / 2]
+          [0, 0, -1.95, 0]
         ] as [number, number, number, number][]
       ).map(([x, y, z, rotation], index) => (
         <Bench key={index} position={[x, y, z]} rotation={rotation} />
@@ -531,10 +528,8 @@ function PlazaDetails() {
       {/* Lamps */}
       {(
         [
-          [-2.85, 0, -2.4],
-          [2.85, 0, -2.4],
-          [-2.85, 0, 2.4],
-          [2.85, 0, 2.4]
+          [-2.55, 0, -2.25],
+          [2.55, 0, -2.25]
         ] as Vector3Tuple[]
       ).map((position, index) => (
         <Lamp key={index} position={position} />
@@ -752,7 +747,26 @@ function CampusDecor() {
     { position: [-1.55, 0, -1.6], color: "#FDE68A" },
     { position: [1.55, 0, -1.6], color: "#F9A8D4" },
     { position: [-1.55, 0, 1.6], color: "#A7F3D0" },
-    { position: [1.55, 0, 1.6], color: "#FDE68A" }
+    { position: [1.55, 0, 1.6], color: "#FDE68A" },
+    // ── Phase 2F.9 Citizen Plaza garden clusters replacing central hedges (18) ──
+    { position: [-3.45, 0, -1.15], color: "#FDE68A" },
+    { position: [-3.7, 0, -0.78], color: "#F8FAFC" },
+    { position: [-3.35, 0, -0.52], color: "#BAE6FD" },
+    { position: [3.45, 0, -1.15], color: "#FDE68A" },
+    { position: [3.7, 0, -0.78], color: "#F8FAFC" },
+    { position: [3.35, 0, -0.52], color: "#BAE6FD" },
+    { position: [-3.45, 0, 1.15], color: "#FEF3C7" },
+    { position: [-3.72, 0, 0.76], color: "#FFFFFF" },
+    { position: [-3.3, 0, 0.48], color: "#CFFAFE" },
+    { position: [3.45, 0, 1.15], color: "#FEF3C7" },
+    { position: [3.72, 0, 0.76], color: "#FFFFFF" },
+    { position: [3.3, 0, 0.48], color: "#CFFAFE" },
+    { position: [-1.18, 0, -3.48], color: "#FDE68A" },
+    { position: [-0.72, 0, -3.68], color: "#F8FAFC" },
+    { position: [-1.55, 0, -3.2], color: "#BAE6FD" },
+    { position: [1.18, 0, -3.48], color: "#FDE68A" },
+    { position: [0.72, 0, -3.68], color: "#F8FAFC" },
+    { position: [1.55, 0, -3.2], color: "#BAE6FD" }
   ];
 
   return (
@@ -769,6 +783,13 @@ function CampusDecor() {
       {flowers.map(({ position, color }, index) => (
         <FlowerPatch key={index} position={position} color={color} />
       ))}
+      {/* Small shrubs only, replacing hedge mass without blocking sightlines */}
+      <SmallShrub position={[-3.72, 0, -0.18]} />
+      <SmallShrub position={[3.72, 0, -0.18]} />
+      <SmallShrub position={[-3.72, 0, 1.72]} />
+      <SmallShrub position={[3.72, 0, 1.72]} />
+      <SmallShrub position={[-1.9, 0, -3.48]} />
+      <SmallShrub position={[1.9, 0, -3.48]} />
       {/* Synty bush clusters */}
       <BushCluster position={[-6.5, 0, -5.2]} />
       <BushCluster position={[6.5, 0, -5.2]} />
@@ -784,13 +805,6 @@ function CampusDecor() {
       <BushCluster position={[6.6, 0, 11.7]} />
       <BushCluster position={[-2.8, 0, 12.6]} />
       <BushCluster position={[2.8, 0, 12.6]} />
-      {/* Hedges along key paths */}
-      <SyntyModel path="/assets/models/SM_Env_Hedge_01.glb" position={[-3.6, 0, -1.2]} scale={0.007} />
-      <SyntyModel path="/assets/models/SM_Env_Hedge_01.glb" position={[3.6, 0, -1.2]} scale={0.007} />
-      <SyntyModel path="/assets/models/SM_Env_Hedge_02.glb" position={[-3.6, 0, 1.2]} scale={0.007} />
-      <SyntyModel path="/assets/models/SM_Env_Hedge_02.glb" position={[3.6, 0, 1.2]} scale={0.007} />
-      <SyntyModel path="/assets/models/SM_Env_Hedge_03.glb" position={[-1.2, 0, -3.6]} scale={0.007} rotation={[0, Math.PI / 2, 0]} />
-      <SyntyModel path="/assets/models/SM_Env_Hedge_03.glb" position={[1.2, 0, -3.6]} scale={0.007} rotation={[0, Math.PI / 2, 0]} />
       {/* Rock clusters */}
       <SyntyModel path="/assets/models/SM_Generic_Small_Rocks_01.glb" position={[-5.5, 0, 3.8]} scale={0.012} />
       <SyntyModel path="/assets/models/SM_Generic_Small_Rocks_02.glb" position={[5.5, 0, 3.8]} scale={0.012} />
@@ -1146,10 +1160,32 @@ function BushCluster({ position }: { position: Vector3Tuple; color?: string }) {
   return <SyntyModel path={paths[idx]} position={position} yOffset={-0.05} />
 }
 
-function FlowerPatch({ position }: { position: Vector3Tuple; color?: string }) {
+function SmallShrub({ position }: { position: Vector3Tuple }) {
+  const idx = Math.abs(Math.round(position[0] + position[2])) % 2
+  const paths = ["/assets/models/SM_Env_Bush_01.glb", "/assets/models/SM_Env_Bush_02.glb"]
+  return <SyntyModel path={paths[idx]} position={position} scale={0.006} yOffset={-0.04} />
+}
+
+function FlowerPatch({ position, color = "#FDE68A" }: { position: Vector3Tuple; color?: string }) {
   const idx = Math.abs(Math.round(position[0])) % 2
   const paths = ["/assets/models/SM_Env_FlowerPatch_01.glb", "/assets/models/SM_Env_FlowerPatch_02.glb"]
-  return <SyntyModel path={paths[idx]} position={position} />
+  const accents: { offset: Vector3Tuple; color: string }[] = [
+    { offset: [-0.18, 0.05, -0.12], color },
+    { offset: [0.14, 0.055, 0.08], color: "#F8FAFC" },
+    { offset: [0.02, 0.06, -0.2], color: "#BAE6FD" },
+  ]
+
+  return (
+    <group position={position}>
+      <SyntyModel path={paths[idx]} position={[0, 0, 0]} />
+      {accents.map(({ offset, color: accent }, index) => (
+        <mesh key={index} castShadow position={offset}>
+          <sphereGeometry args={[0.055, 8, 6]} />
+          <meshStandardMaterial color={accent} roughness={0.48} />
+        </mesh>
+      ))}
+    </group>
+  )
 }
 
 function Bench({ position, rotation }: { position: Vector3Tuple; rotation: number }) {
@@ -1305,6 +1341,271 @@ const HUMAN_MODELS = [
   "/assets/models/SM_Chr_HumanCitizen_02.glb",
 ]
 
+type AmbientWaypoint = {
+  id: string
+  position: Vector3Tuple
+  lookAt?: Vector3Tuple
+  waitSeconds?: number
+  district?: string
+}
+
+type ObstacleZone = {
+  id: string
+  type: "circle" | "rect"
+  position: Vector3Tuple
+  radius?: number
+  size?: [number, number]
+}
+
+const CITIZEN_COLLISION_RADIUS = 0.42
+const CITIZEN_AVOIDANCE_RADIUS = 0.88
+const OBSTACLE_PADDING = 0.34
+
+const OBSTACLE_ZONES: ObstacleZone[] = [
+  // Landmark buildings
+  { id: "founder-tower-building", type: "rect", position: [-7.8, 0, -8.6], size: [2.75, 2.45] },
+  { id: "ai-agent-lab-building", type: "rect", position: [0, 0, -8.8], size: [3.6, 2.65] },
+  { id: "knowledge-library-building", type: "rect", position: [7.8, 0, -8.6], size: [3.1, 2.45] },
+  { id: "opportunity-center-building", type: "rect", position: [-8.7, 0, 0.35], size: [3.0, 1.95] },
+  { id: "compute-center-building", type: "rect", position: [8.7, 0, 0.35], size: [2.95, 1.95] },
+  { id: "team-office-building", type: "rect", position: [0, 0, 7.7], size: [3.35, 2.05] },
+  // Plaza core props and boards
+  { id: "plaza-fountain", type: "circle", position: [0, 0, 0], radius: 1.05 },
+  { id: "plaza-welcome-board", type: "rect", position: [-2.75, 0, 2.6], size: [1.55, 0.72] },
+  { id: "plaza-campus-map-board", type: "rect", position: [0, 0, 3.05], size: [1.7, 0.76] },
+  { id: "plaza-registry-board", type: "rect", position: [2.75, 0, 2.6], size: [1.55, 0.72] },
+  { id: "plaza-south-bench", type: "rect", position: [0, 0, -1.95], size: [1.65, 0.72] },
+  // District boards / large props
+  { id: "opportunity-board", type: "rect", position: [-5.5, 0, 0.75], size: [1.75, 0.82] },
+  { id: "compute-screen", type: "rect", position: [8.7, 0, 2.1], size: [1.5, 0.82] },
+  { id: "team-office-desks", type: "rect", position: [0, 0, 5.5], size: [3.4, 0.95] },
+  { id: "knowledge-bookshelves", type: "rect", position: [7.8, 0, -6.85], size: [4.8, 0.95] },
+  // Large trees and old hedge garden footprints
+  { id: "plaza-tree-nw", type: "circle", position: [-2.8, 0, 2.25], radius: 0.58 },
+  { id: "plaza-tree-ne", type: "circle", position: [2.8, 0, 2.25], radius: 0.58 },
+  { id: "plaza-tree-sw", type: "circle", position: [-2.95, 0, -2.2], radius: 0.58 },
+  { id: "plaza-tree-se", type: "circle", position: [2.95, 0, -2.2], radius: 0.58 },
+  { id: "plaza-garden-west", type: "rect", position: [-3.55, 0, 0.35], size: [0.95, 3.35] },
+  { id: "plaza-garden-east", type: "rect", position: [3.55, 0, 0.35], size: [0.95, 3.35] },
+  { id: "plaza-garden-north", type: "rect", position: [0, 0, -3.45], size: [4.0, 0.95] },
+  { id: "ai-lab-trees-left", type: "circle", position: [-3.2, 0, -7.35], radius: 0.65 },
+  { id: "ai-lab-trees-right", type: "circle", position: [3.2, 0, -7.35], radius: 0.65 },
+  { id: "founder-tree-cluster", type: "circle", position: [-6.1, 0, -10.9], radius: 0.75 },
+  { id: "knowledge-tree-cluster", type: "circle", position: [6.1, 0, -10.9], radius: 0.75 },
+  { id: "opportunity-tree-cluster", type: "circle", position: [-9.8, 0, 3.8], radius: 0.75 },
+  { id: "compute-tree-cluster", type: "circle", position: [9.8, 0, 3.8], radius: 0.75 },
+]
+
+const AMBIENT_WAYPOINTS_BY_DISTRICT: Record<string, AmbientWaypoint[]> = {
+  "Citizen Plaza": [
+    { id: "plaza-fountain-west", position: [-1.35, 0, -0.25], lookAt: [0, 0, 0], waitSeconds: 3, district: "Citizen Plaza" },
+    { id: "plaza-welcome", position: [-1.95, 0, 1.45], lookAt: [-2.75, 0, 2.6], waitSeconds: 4, district: "Citizen Plaza" },
+    { id: "plaza-campus-map", position: [-0.55, 0, 2.15], lookAt: [0, 0, 3.05], waitSeconds: 4, district: "Citizen Plaza" },
+    { id: "plaza-registry", position: [1.95, 0, 1.55], lookAt: [2.75, 0, 2.6], waitSeconds: 4, district: "Citizen Plaza" },
+    { id: "plaza-fountain-east", position: [1.35, 0, -0.2], lookAt: [0, 0, 0], waitSeconds: 3, district: "Citizen Plaza" },
+    { id: "plaza-south-social", position: [0.2, 0, -2.45], lookAt: [0, 0, 0], waitSeconds: 3, district: "Citizen Plaza" },
+  ],
+  "AI Agent Lab": [
+    { id: "ai-lab-front-left", position: [-2.2, 0, -5.1], lookAt: [0, 0, -8.8], waitSeconds: 4, district: "AI Agent Lab" },
+    { id: "ai-lab-front-right", position: [2.2, 0, -5.1], lookAt: [0, 0, -8.8], waitSeconds: 4, district: "AI Agent Lab" },
+    { id: "ai-lab-path-center", position: [0, 0, -4.25], lookAt: [0, 0, -8.8], waitSeconds: 3, district: "AI Agent Lab" },
+    { id: "ai-lab-side-left", position: [-3.75, 0, -6.55], lookAt: [0, 0, -8.8], waitSeconds: 3, district: "AI Agent Lab" },
+    { id: "ai-lab-side-right", position: [3.75, 0, -6.55], lookAt: [0, 0, -8.8], waitSeconds: 3, district: "AI Agent Lab" },
+  ],
+  "Founder Tower": [
+    { id: "founder-entry", position: [-7.1, 0, -6.25], lookAt: [-7.8, 0, -8.6], waitSeconds: 5, district: "Founder Tower" },
+    { id: "founder-path", position: [-6.05, 0, -7.45], lookAt: [-7.8, 0, -8.6], waitSeconds: 4, district: "Founder Tower" },
+    { id: "founder-bench", position: [-8.65, 0, -6.95], lookAt: [-7.8, 0, -8.6], waitSeconds: 4, district: "Founder Tower" },
+  ],
+  "Knowledge Library": [
+    { id: "knowledge-entry-left", position: [6.1, 0, -6.25], lookAt: [7.8, 0, -8.6], waitSeconds: 4, district: "Knowledge Library" },
+    { id: "knowledge-entry-right", position: [8.85, 0, -6.15], lookAt: [7.8, 0, -8.6], waitSeconds: 4, district: "Knowledge Library" },
+    { id: "knowledge-bookshelf-left", position: [5.1, 0, -5.8], lookAt: [6.0, 0, -6.85], waitSeconds: 5, district: "Knowledge Library" },
+    { id: "knowledge-bookshelf-right", position: [9.15, 0, -5.8], lookAt: [8.8, 0, -6.85], waitSeconds: 5, district: "Knowledge Library" },
+  ],
+  "Opportunity Center": [
+    { id: "opportunity-board", position: [-7.0, 0, 1.05], lookAt: [-6.0, 0, 0.75], waitSeconds: 5, district: "Opportunity Center" },
+    { id: "opportunity-market", position: [-8.65, 0, 2.75], lookAt: [-8.7, 0, 0.35], waitSeconds: 4, district: "Opportunity Center" },
+    { id: "opportunity-path", position: [-6.25, 0, 2.25], lookAt: [-8.7, 0, 0.35], waitSeconds: 3, district: "Opportunity Center" },
+    { id: "opportunity-side", position: [-9.75, 0, 1.35], lookAt: [-8.7, 0, 0.35], waitSeconds: 4, district: "Opportunity Center" },
+  ],
+  "Compute Center": [
+    { id: "compute-entry", position: [7.0, 0, 1.25], lookAt: [8.7, 0, 0.35], waitSeconds: 4, district: "Compute Center" },
+    { id: "compute-screen", position: [7.25, 0, 1.85], lookAt: [8.7, 0, 2.1], waitSeconds: 5, district: "Compute Center" },
+    { id: "compute-pond", position: [6.55, 0, 2.55], lookAt: [6.7, 0, 5.7], waitSeconds: 3, district: "Compute Center" },
+    { id: "compute-side", position: [10.1, 0, 2.0], lookAt: [8.7, 0, 0.35], waitSeconds: 4, district: "Compute Center" },
+  ],
+  "Team Office": [
+    { id: "team-entry-left", position: [-1.45, 0, 4.65], lookAt: [0, 0, 7.7], waitSeconds: 4, district: "Team Office" },
+    { id: "team-entry-right", position: [1.25, 0, 4.75], lookAt: [0, 0, 7.7], waitSeconds: 4, district: "Team Office" },
+    { id: "team-table", position: [0, 0, 4.25], lookAt: [0, 0, 7.7], waitSeconds: 5, district: "Team Office" },
+    { id: "team-path", position: [2.65, 0, 4.05], lookAt: [0, 0, 7.7], waitSeconds: 3, district: "Team Office" },
+  ],
+}
+
+function hashCitizenId(id: string) {
+  return Array.from(id).reduce((sum, char) => sum + char.charCodeAt(0), 0)
+}
+
+function rotateWaypoints(waypoints: AmbientWaypoint[], offset: number) {
+  if (waypoints.length === 0) return waypoints
+  const pivot = offset % waypoints.length
+  return [...waypoints.slice(pivot), ...waypoints.slice(0, pivot)]
+}
+
+function getAmbientRoute(citizen: CitizenManifest): AmbientWaypoint[] {
+  const base = AMBIENT_WAYPOINTS_BY_DISTRICT[citizen.location.district]
+  if (!base?.length) return []
+
+  const seed = hashCitizenId(citizen.citizen_id)
+  const [x, y, z] = citizen.location.coordinates
+  const districtTarget = base[seed % base.length]?.lookAt ?? base[seed % base.length]?.position
+
+  return [
+    {
+      id: `${citizen.citizen_id}-home`,
+      position: [x, y, z],
+      lookAt: districtTarget,
+      waitSeconds: 1.5 + (seed % 4) * 0.45,
+      district: citizen.location.district,
+    },
+    ...rotateWaypoints(base, seed),
+  ]
+}
+
+const citizenPositionRegistry = new Map<string, THREE.Vector3>()
+
+function isPointInObstacle(point: Vector3Tuple | THREE.Vector3, zone: ObstacleZone, padding = OBSTACLE_PADDING) {
+  const px = Array.isArray(point) ? point[0] : point.x
+  const pz = Array.isArray(point) ? point[2] : point.z
+  const zx = zone.position[0]
+  const zz = zone.position[2]
+
+  if (zone.type === "circle") {
+    const radius = (zone.radius ?? 0) + padding
+    return Math.hypot(px - zx, pz - zz) < radius
+  }
+
+  const [width, depth] = zone.size ?? [0, 0]
+  return Math.abs(px - zx) < width / 2 + padding && Math.abs(pz - zz) < depth / 2 + padding
+}
+
+function isPointBlocked(point: Vector3Tuple | THREE.Vector3) {
+  return OBSTACLE_ZONES.some((zone) => isPointInObstacle(point, zone))
+}
+
+function segmentIntersectsObstacle(from: THREE.Vector3, to: Vector3Tuple) {
+  const target = new THREE.Vector3(...to)
+  const distance = from.distanceTo(target)
+  const steps = Math.max(2, Math.ceil(distance / 0.35))
+
+  for (let step = 1; step <= steps; step += 1) {
+    const t = step / steps
+    const point = from.clone().lerp(target, t)
+    if (isPointBlocked(point)) return true
+  }
+
+  return false
+}
+
+function getObstaclePushVector(position: THREE.Vector3) {
+  const push = new THREE.Vector3()
+
+  OBSTACLE_ZONES.forEach((zone) => {
+    const zx = zone.position[0]
+    const zz = zone.position[2]
+
+    if (zone.type === "circle") {
+      const limit = (zone.radius ?? 0) + OBSTACLE_PADDING
+      const dx = position.x - zx
+      const dz = position.z - zz
+      const distance = Math.hypot(dx, dz)
+      if (distance > 0.0001 && distance < limit) {
+        const strength = (limit - distance) / limit
+        push.x += (dx / distance) * strength
+        push.z += (dz / distance) * strength
+      }
+      return
+    }
+
+    const [width, depth] = zone.size ?? [0, 0]
+    const halfW = width / 2 + OBSTACLE_PADDING
+    const halfD = depth / 2 + OBSTACLE_PADDING
+    const dx = position.x - zx
+    const dz = position.z - zz
+    if (Math.abs(dx) >= halfW || Math.abs(dz) >= halfD) return
+
+    const escapeX = halfW - Math.abs(dx)
+    const escapeZ = halfD - Math.abs(dz)
+    if (escapeX < escapeZ) {
+      push.x += (dx >= 0 ? 1 : -1) * (escapeX / halfW)
+    } else {
+      push.z += (dz >= 0 ? 1 : -1) * (escapeZ / halfD)
+    }
+  })
+
+  return push
+}
+
+function getCitizenAvoidanceVector(id: string, position: THREE.Vector3) {
+  const push = new THREE.Vector3()
+
+  citizenPositionRegistry.forEach((otherPosition, otherId) => {
+    if (otherId === id) return
+
+    const dx = position.x - otherPosition.x
+    const dz = position.z - otherPosition.z
+    const distance = Math.hypot(dx, dz)
+    if (distance < 0.0001 || distance >= CITIZEN_AVOIDANCE_RADIUS) return
+
+    const collisionBoost = distance < CITIZEN_COLLISION_RADIUS ? 1.45 : 1
+    const strength = ((CITIZEN_AVOIDANCE_RADIUS - distance) / CITIZEN_AVOIDANCE_RADIUS) * collisionBoost
+    push.x += (dx / distance) * strength
+    push.z += (dz / distance) * strength
+  })
+
+  return push
+}
+
+function findReachableWaypoint(route: AmbientWaypoint[], startIndex: number, from: THREE.Vector3) {
+  for (let attempt = 0; attempt < route.length; attempt += 1) {
+    const index = (startIndex + attempt) % route.length
+    const waypoint = route[index]
+    if (!isPointBlocked(waypoint.position) && !segmentIntersectsObstacle(from, waypoint.position)) {
+      return { waypoint, index }
+    }
+  }
+
+  return undefined
+}
+
+function yawToward(from: THREE.Vector3, to: Vector3Tuple | THREE.Vector3) {
+  const targetX = Array.isArray(to) ? to[0] : to.x
+  const targetZ = Array.isArray(to) ? to[2] : to.z
+  const dx = targetX - from.x
+  const dz = targetZ - from.z
+  if (Math.hypot(dx, dz) < 0.001) return undefined
+  return Math.atan2(-dz, dx)
+}
+
+function shortestAngleDelta(current: number, target: number) {
+  return Math.atan2(Math.sin(target - current), Math.cos(target - current))
+}
+
+function getCitizenPlazaLookRotation(citizen: CitizenManifest): [number, number, number] | undefined {
+  if (citizen.location.district !== "Citizen Plaza") return undefined
+
+  const [x, , z] = citizen.location.coordinates
+  const targetX = 0
+  const targetZ = 0
+  const dx = targetX - x
+  const dz = targetZ - z
+  if (Math.hypot(dx, dz) < 0.001) return undefined
+
+  // Tripo citizen meshes face local +X at zero rotation, so yaw the +X axis toward the plaza center.
+  return [0, Math.atan2(-dz, dx), 0]
+}
+
 function getCitizenModel(citizen: CitizenManifest): { path: string; scale: number } | undefined {
   if (citizen.avatar_type in CITIZEN_MODELS_BY_TYPE) {
     return CITIZEN_MODELS_BY_TYPE[citizen.avatar_type]
@@ -1319,16 +1620,124 @@ function getCitizenModel(citizen: CitizenManifest): { path: string; scale: numbe
 function CitizenMesh({ citizen }: { citizen: CitizenManifest }) {
   const select = useCampusStore((state) => state.select);
   const [x, , z] = citizen.location.coordinates;
+  const moverRef = useRef<THREE.Group>(null)
+  const modelShellRef = useRef<THREE.Group>(null)
   const isComputeDevice = citizen.avatar_type === "device-placeholder";
   const isRobot = citizen.avatar_type === "agent-placeholder";
   const tripoModel = getCitizenModel(citizen);
   const citizenTargetH = isRobot ? ROBOT_TARGET_HEIGHT : CITIZEN_TARGET_HEIGHT
+  const canAmbientMove = Boolean(tripoModel && !isComputeDevice)
+  const ambientRoute = useMemo(() => (canAmbientMove ? getAmbientRoute(citizen) : []), [canAmbientMove, citizen])
+  const ambientState = useRef({
+    position: new THREE.Vector3(x, 0, z),
+    waypointIndex: 1,
+    waitSeconds: 0,
+    waitLookAt: undefined as Vector3Tuple | undefined,
+    speed: 0.26 + (hashCitizenId(citizen.citizen_id) % 5) * 0.025,
+  })
+  const modelRotation = getCitizenPlazaLookRotation(citizen)
   const labelBaseY = isComputeDevice ? HEIGHT.DEVICE : (tripoModel ? citizenTargetH + 0.2 : 1.35)
   const typeColor = getCitizenTypeColor(citizen.citizen_type)
+
+  useEffect(() => {
+    ambientState.current.position.set(x, 0, z)
+    ambientState.current.waypointIndex = ambientRoute.length > 1 ? 1 : 0
+    ambientState.current.waitSeconds = ambientRoute[0]?.waitSeconds ?? 0
+    ambientState.current.waitLookAt = ambientRoute[0]?.lookAt
+    moverRef.current?.position.set(x, 0, z)
+    if (canAmbientMove) {
+      citizenPositionRegistry.set(citizen.citizen_id, ambientState.current.position.clone())
+    }
+  }, [ambientRoute, x, z])
+
+  useEffect(() => {
+    return () => {
+      citizenPositionRegistry.delete(citizen.citizen_id)
+    }
+  }, [citizen.citizen_id])
+
+  useFrame((_, delta) => {
+    if (!canAmbientMove || ambientRoute.length === 0 || !moverRef.current) return
+
+    const state = ambientState.current
+    const obstacleRecovery = getObstaclePushVector(state.position)
+    if (obstacleRecovery.lengthSq() > 0.0001) {
+      obstacleRecovery.normalize()
+      state.position.addScaledVector(obstacleRecovery, delta * 0.55)
+      moverRef.current.position.copy(state.position)
+      citizenPositionRegistry.set(citizen.citizen_id, state.position.clone())
+      return
+    }
+
+    const reachable = findReachableWaypoint(ambientRoute, state.waypointIndex, state.position)
+    if (!reachable) {
+      state.waitSeconds = Math.max(state.waitSeconds, 0.5)
+      citizenPositionRegistry.set(citizen.citizen_id, state.position.clone())
+      return
+    }
+
+    state.waypointIndex = reachable.index
+    const waypoint = reachable.waypoint
+
+    if (state.waitSeconds > 0) {
+      state.waitSeconds = Math.max(0, state.waitSeconds - delta)
+      const yaw = state.waitLookAt ? yawToward(state.position, state.waitLookAt) : undefined
+      if (yaw !== undefined && modelShellRef.current) {
+        modelShellRef.current.rotation.y += shortestAngleDelta(modelShellRef.current.rotation.y, yaw) * Math.min(1, delta * 4)
+      }
+      if (state.waitSeconds === 0) {
+        state.waitLookAt = undefined
+      }
+      citizenPositionRegistry.set(citizen.citizen_id, state.position.clone())
+      return
+    }
+
+    const target = new THREE.Vector3(...waypoint.position)
+    const direction = target.sub(state.position)
+    const distance = direction.length()
+
+    if (distance < 0.045) {
+      state.position.set(...waypoint.position)
+      moverRef.current.position.copy(state.position)
+      state.waypointIndex = (state.waypointIndex + 1) % ambientRoute.length
+      state.waitSeconds = waypoint.waitSeconds ?? 3
+      state.waitLookAt = waypoint.lookAt
+      return
+    }
+
+    direction.normalize()
+    const proposedPosition = state.position.clone().addScaledVector(direction, Math.min(distance, state.speed * delta))
+    const proposedObstaclePush = getObstaclePushVector(proposedPosition)
+    const proposedCitizenPush = getCitizenAvoidanceVector(citizen.citizen_id, proposedPosition)
+
+    if (proposedObstaclePush.lengthSq() > 0.0001) {
+      proposedPosition.addScaledVector(proposedObstaclePush.normalize(), delta * 0.62)
+    }
+    if (proposedCitizenPush.lengthSq() > 0.0001) {
+      proposedPosition.addScaledVector(proposedCitizenPush.normalize(), delta * 0.38)
+    }
+
+    if (isPointBlocked(proposedPosition)) {
+      state.waypointIndex = (state.waypointIndex + 1) % ambientRoute.length
+      state.waitSeconds = 0.35
+      citizenPositionRegistry.set(citizen.citizen_id, state.position.clone())
+      return
+    }
+
+    state.position.copy(proposedPosition)
+    moverRef.current.position.copy(state.position)
+    citizenPositionRegistry.set(citizen.citizen_id, state.position.clone())
+
+    if (modelShellRef.current) {
+      const yaw = Math.atan2(-direction.z, direction.x)
+      modelShellRef.current.rotation.y += shortestAngleDelta(modelShellRef.current.rotation.y, yaw) * Math.min(1, delta * 6)
+    }
+  })
 
   return (
     <Float speed={0.85} rotationIntensity={0.04} floatIntensity={0.07}>
       <group
+        ref={moverRef}
         position={[x, 0, z]}
         onClick={(event) => stopAndRun(event, () => select({ kind: "citizen", id: citizen.citizen_id }))}
       >
@@ -1345,7 +1754,9 @@ function CitizenMesh({ citizen }: { citizen: CitizenManifest }) {
             </mesh>
           </>
         ) : tripoModel ? (
-          <TripoModel path={tripoModel.path} scale={citizenTargetH} autoNorm position={[0, 0, 0]} />
+          <group ref={modelShellRef} rotation={modelRotation}>
+            <TripoModel path={tripoModel.path} scale={citizenTargetH} autoNorm position={[0, 0, 0]} />
+          </group>
         ) : (
           // Fallback procedural human
           <>
