@@ -119,10 +119,7 @@ SYNTY_TREE_PATHS.forEach(p => useGLTF.preload(p))
   "/assets/models/SM_Prop_ShopCounter_01.glb",
   "/assets/models/SM_Prop_Desk_01.glb",
   "/assets/models/SM_Prop_Sign_01.glb",
-  // clouds & rocks
-  "/assets/models/SM_Generic_Cloud_01.glb",
-  "/assets/models/SM_Generic_Cloud_02.glb",
-  "/assets/models/SM_Generic_Cloud_03.glb",
+  // rocks
   "/assets/models/SM_Generic_Small_Rocks_01.glb",
   "/assets/models/SM_Generic_Small_Rocks_02.glb",
   // Tripo buildings
@@ -776,12 +773,7 @@ function CampusDecor() {
       <FlowerPatch position={[3.8, 0, 12.7]} />
       <FlowerPatch position={[8.0, 0, 10.9]} />
       <FlowerPatch position={[11.6, 0, 7.9]} />
-      {/* Floating clouds */}
-      <SyntyModel path="/assets/models/SM_Generic_Cloud_01.glb" position={[-8, 14, -6]} scale={0.05} />
-      <SyntyModel path="/assets/models/SM_Generic_Cloud_02.glb" position={[10, 16, -10]} scale={0.04} />
-      <SyntyModel path="/assets/models/SM_Generic_Cloud_03.glb" position={[4, 13, -14]} scale={0.045} />
-      <SyntyModel path="/assets/models/SM_Generic_Cloud_01.glb" position={[-12, 15, 4]} scale={0.035} />
-      <SyntyModel path="/assets/models/SM_Generic_Cloud_02.glb" position={[14, 17, 2]} scale={0.05} />
+      {/* Clouds removed — Synty cloud GLBs are 729×170 raw units; at scale≥0.035 they exceed 25m and block viewport */}
     </group>
   );
 }
@@ -1477,15 +1469,10 @@ function SceneContents() {
       {districts.map((district) => (
         <DistrictMesh key={district.id} district={district} />
       ))}
-      {citizens.map((citizen) => (
-        <CitizenMesh key={citizen.citizen_id} citizen={citizen} />
-      ))}
       {npcs.map((npc) => (
         <NpcMesh key={npc.id} npc={npc} />
       ))}
-      {opportunities.map((opportunity) => (
-        <OpportunityMarker key={opportunity.id} opportunity={opportunity} />
-      ))}
+      {/* DEBUG: citizens tạm ẩn */}
     </group>
   );
 }
