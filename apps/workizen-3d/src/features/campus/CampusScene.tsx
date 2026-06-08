@@ -141,12 +141,12 @@ SYNTY_TREE_PATHS.forEach(p => useGLTF.preload(p))
   "/assets/models/SM_Prop_Blimp_01.glb",
   "/assets/models/SM_Prop_Pier_01.glb",
   "/assets/models/SM_Prop_InfoBoard_01.glb",
-  // Tripo characters
-  "/assets/models/SM_Chr_HumanCitizen_01.glb",
-  "/assets/models/SM_Chr_HumanCitizen_02.glb",
-  "/assets/models/SM_Chr_RobotCitizen_01.glb",
-  "/assets/models/SM_Chr_KnowledgeCitizen_01.glb",
-  "/assets/models/SM_Chr_ComputeCitizen_01.glb",
+  // Tripo characters (rigged — skeleton added via auto-rig-characters.mjs)
+  "/assets/models/SM_Chr_HumanCitizen_01_Rigged.glb",
+  "/assets/models/SM_Chr_HumanCitizen_02_Rigged.glb",
+  "/assets/models/SM_Chr_RobotCitizen_01_Rigged.glb",
+  "/assets/models/SM_Chr_KnowledgeCitizen_01_Rigged.glb",
+  "/assets/models/SM_Chr_ComputeCitizen_01_Rigged.glb",
   // Mixamo animations (rigged skeleton clips)
   "/assets/animations/Idle.glb",
   "/assets/animations/Walking.glb",
@@ -283,8 +283,7 @@ function createOrganicIslandShape(radiusX: number, radiusZ: number, wobble = 0.0
   return shape
 }
 
-// AnimatedModel: dùng cho GLB có đầy đủ skeleton + animations (Ready Player Me, Mixamo với mesh)
-// Tripo characters hiện tại không có skeleton → dùng TripoModel thay thế
+// AnimatedModel: rigged GLB (_Rigged.glb từ auto-rig-characters.mjs) + Mixamo animation clip
 function AnimatedModel({
   modelPath,
   animPath,
@@ -1269,24 +1268,24 @@ function MeetingTable({ position, accent }: { position: Vector3Tuple; accent: st
 
 // ── Citizen Meshes ────────────────────────────────────────────────────────────
 
-const CITIZEN_MODELS_BY_TYPE: Record<string, { path: string; scale: number }> = {
-  "agent-placeholder":         { path: "/assets/models/SM_Chr_RobotCitizen_01.glb",     scale: HEIGHT.ROBOT },
-  "knowledge-placeholder":     { path: "/assets/models/SM_Chr_KnowledgeCitizen_01.glb", scale: HEIGHT.HUMAN },
-  "compute-human-placeholder": { path: "/assets/models/SM_Chr_ComputeCitizen_01.glb",   scale: HEIGHT.HUMAN },
+const CITIZEN_MODELS_BY_TYPE: Record<string, { path: string; scale: number; animPath: string }> = {
+  "agent-placeholder":         { path: "/assets/models/SM_Chr_RobotCitizen_01_Rigged.glb",     scale: HEIGHT.ROBOT, animPath: "/assets/animations/Idle.glb" },
+  "knowledge-placeholder":     { path: "/assets/models/SM_Chr_KnowledgeCitizen_01_Rigged.glb", scale: HEIGHT.HUMAN, animPath: "/assets/animations/Idle.glb" },
+  "compute-human-placeholder": { path: "/assets/models/SM_Chr_ComputeCitizen_01_Rigged.glb",   scale: HEIGHT.HUMAN, animPath: "/assets/animations/Typing.glb" },
 }
 
-const HUMAN_MODELS = [
-  "/assets/models/SM_Chr_HumanCitizen_01.glb",
-  "/assets/models/SM_Chr_HumanCitizen_02.glb",
+const HUMAN_MODELS: Array<{ path: string; animPath: string }> = [
+  { path: "/assets/models/SM_Chr_HumanCitizen_01_Rigged.glb", animPath: "/assets/animations/Idle.glb" },
+  { path: "/assets/models/SM_Chr_HumanCitizen_02_Rigged.glb", animPath: "/assets/animations/Wave.glb" },
 ]
 
-function getCitizenModel(citizen: CitizenManifest): { path: string; scale: number } | undefined {
+function getCitizenModel(citizen: CitizenManifest): { path: string; scale: number; animPath: string } | undefined {
   if (citizen.avatar_type in CITIZEN_MODELS_BY_TYPE) {
     return CITIZEN_MODELS_BY_TYPE[citizen.avatar_type]
   }
   if (citizen.avatar_type === "placeholder") {
     const idx = citizen.citizen_id.charCodeAt(citizen.citizen_id.length - 1) % 2
-    return { path: HUMAN_MODELS[idx], scale: HEIGHT.HUMAN }
+    return { ...HUMAN_MODELS[idx], scale: HEIGHT.HUMAN }
   }
   return undefined
 }
@@ -1318,12 +1317,12 @@ function CitizenMesh({ citizen }: { citizen: CitizenManifest }) {
             </mesh>
           </>
         ) : tripoModel ? (
-          // Tripo normalized 1×1×1, yOffset = scale/2 to sit on ground
-          <TripoModel
-            path={tripoModel.path}
-            position={[0, 0, 0]}
+          // Rigged character with Mixamo idle animation
+          <AnimatedModel
+            modelPath={tripoModel.path}
+            animPath={tripoModel.animPath}
+            position={[0, tripoModel.scale / 2, 0]}
             scale={tripoModel.scale}
-            yOffset={tripoModel.scale / 2}
           />
         ) : (
           // Fallback procedural human
