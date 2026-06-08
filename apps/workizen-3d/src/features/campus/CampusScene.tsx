@@ -141,6 +141,12 @@ SYNTY_TREE_PATHS.forEach(p => useGLTF.preload(p))
   "/assets/models/SM_Prop_Blimp_01.glb",
   "/assets/models/SM_Prop_Pier_01.glb",
   "/assets/models/SM_Prop_InfoBoard_01.glb",
+  // Tripo characters
+  "/assets/models/SM_Chr_HumanCitizen_01.glb",
+  "/assets/models/SM_Chr_HumanCitizen_02.glb",
+  "/assets/models/SM_Chr_RobotCitizen_01.glb",
+  "/assets/models/SM_Chr_KnowledgeCitizen_01.glb",
+  "/assets/models/SM_Chr_ComputeCitizen_01.glb",
   // Mixamo animations (rigged skeleton clips)
   "/assets/animations/Idle.glb",
   "/assets/animations/Walking.glb",
@@ -1263,10 +1269,25 @@ function MeetingTable({ position, accent }: { position: Vector3Tuple; accent: st
 
 // ── Citizen Meshes ────────────────────────────────────────────────────────────
 
-// Tripo citizen meshes are intentionally not used in Phase 2A.
-// Their raw dimensions are not normalized to the scene scale, and NPC work is postponed.
+const CITIZEN_MODELS_BY_TYPE: Record<string, { path: string; scale: number }> = {
+  "agent-placeholder":         { path: "/assets/models/SM_Chr_RobotCitizen_01.glb",     scale: HEIGHT.ROBOT },
+  "knowledge-placeholder":     { path: "/assets/models/SM_Chr_KnowledgeCitizen_01.glb", scale: HEIGHT.HUMAN },
+  "compute-human-placeholder": { path: "/assets/models/SM_Chr_ComputeCitizen_01.glb",   scale: HEIGHT.HUMAN },
+}
+
+const HUMAN_MODELS = [
+  "/assets/models/SM_Chr_HumanCitizen_01.glb",
+  "/assets/models/SM_Chr_HumanCitizen_02.glb",
+]
+
 function getCitizenModel(citizen: CitizenManifest): { path: string; scale: number } | undefined {
-  void citizen
+  if (citizen.avatar_type in CITIZEN_MODELS_BY_TYPE) {
+    return CITIZEN_MODELS_BY_TYPE[citizen.avatar_type]
+  }
+  if (citizen.avatar_type === "placeholder") {
+    const idx = citizen.citizen_id.charCodeAt(citizen.citizen_id.length - 1) % 2
+    return { path: HUMAN_MODELS[idx], scale: HEIGHT.HUMAN }
+  }
   return undefined
 }
 

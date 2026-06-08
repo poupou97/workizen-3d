@@ -41,7 +41,7 @@ export interface CitizenManifest {
     coordinates: Vector3Tuple;
   };
   current_status: string;
-  avatar_type: "placeholder" | "ready-player-me-later" | "device-placeholder" | "agent-placeholder";
+  avatar_type: "placeholder" | "knowledge-placeholder" | "compute-human-placeholder" | "ready-player-me-later" | "device-placeholder" | "agent-placeholder";
   interaction_type: "info_panel" | "npc_panel" | "opportunity_panel" | "compute_panel";
   allowed_actions: string[];
   color: string;

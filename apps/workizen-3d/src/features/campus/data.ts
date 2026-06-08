@@ -59,7 +59,7 @@ export const districts: District[] = [
     name: "Compute Center",
     description: "The infrastructure district for Compute Citizens, capacity, and future AI workloads.",
     purpose: "Make compute resources part of the Digital Citizen economy without building real scheduling yet.",
-    activeCitizenIds: ["compute-citizen", "macbook-m1-compute-citizen", "compute-03"],
+    activeCitizenIds: ["compute-worker", "compute-citizen", "macbook-m1-compute-citizen", "compute-03"],
     opportunityIds: [],
     npcIds: ["compute-manager"],
     position: [8.7, 0, 0.35],
@@ -159,7 +159,7 @@ export const citizens: CitizenManifest[] = [
     availability: "available",
     location: { world: "Workizen HQ Campus", district: "Knowledge Library", coordinates: [6.25, 0, -6.45] },
     current_status: "Curating a knowledge path.",
-    avatar_type: "placeholder",
+    avatar_type: "knowledge-placeholder",
     interaction_type: "info_panel",
     allowed_actions: ["view_knowledge", "recommend_playbook", "join_team"],
     color: "#FFE9B8",
@@ -594,7 +594,7 @@ export const citizens: CitizenManifest[] = [
     availability: "available",
     location: { world: "Workizen HQ Campus", district: "Knowledge Library", coordinates: [9.2, 0, -5.8] },
     current_status: "Publishing an AWS architecture playbook.",
-    avatar_type: "placeholder",
+    avatar_type: "knowledge-placeholder",
     interaction_type: "info_panel",
     allowed_actions: ["view_knowledge", "recommend_playbook", "review_architecture"],
     color: "#FFE4A8",
@@ -611,11 +611,30 @@ export const citizens: CitizenManifest[] = [
     availability: "available",
     location: { world: "Workizen HQ Campus", district: "Knowledge Library", coordinates: [4.8, 0, -5.8] },
     current_status: "Reviewing AI agent design patterns.",
-    avatar_type: "placeholder",
+    avatar_type: "knowledge-placeholder",
     interaction_type: "info_panel",
     allowed_actions: ["view_knowledge", "recommend_playbook", "mentor_ai_agents"],
     color: "#FFF0C0",
     accentColor: "#F59E0B"
+  },
+
+  // ── Compute Worker (human tech engineer at Compute Center) ───────────────────
+  {
+    citizen_id: "compute-worker",
+    citizen_type: "Compute Citizen",
+    name: "Compute Worker",
+    role: "Infrastructure Engineer",
+    description: "A tech engineer managing compute infrastructure and AI workload scheduling at the Compute Center.",
+    skills: ["infrastructure", "workload scheduling", "containerization", "monitoring"],
+    reputation: { score: 71, level: "Infrastructure Builder", summary: "Reliable engineer keeping compute capacity running." },
+    availability: "available",
+    location: { world: "Workizen HQ Campus", district: "Compute Center", coordinates: [7.2, 0, 1.8] },
+    current_status: "Monitoring workload queues.",
+    avatar_type: "compute-human-placeholder",
+    interaction_type: "info_panel",
+    allowed_actions: ["view_profile", "check_capacity", "schedule_workload"],
+    color: "#BDEEFF",
+    accentColor: "#06B6D4"
   },
 
   // ── Additional Compute Citizen (1) ───────────────────────────────────────────
