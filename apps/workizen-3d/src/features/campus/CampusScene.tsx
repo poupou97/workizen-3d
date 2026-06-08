@@ -52,7 +52,7 @@ const SYNTY_PALETTE = "/assets/textures/PolygonTown_Texture_01_A.png"
 //   SM_Env_Tree_01          scale=0.010 → 4.69m
 //   SM_Env_Tree_Pine_01     scale=0.010 → 5.48m
 //   SM_Env_Tree_Large_01    scale=0.004 → 4.65m
-//   SM_Prop_Fountain_01     scale=0.012 → 1.82m
+//   SM_Prop_Fountain_01     scale=0.013 → ~1.97m
 //   SM_Prop_Bookshelf_01    scale=0.010 → 2.19m
 //   SM_Prop_Desk_01         scale=0.012 → 1.05m
 // ─────────────────────────────────────────────────────────────────────────────
@@ -70,13 +70,13 @@ const HEIGHT = {
   // Vegetation (Tripo)
   BAMBOO:  2.50,  // bamboo cluster
   CHERRY:  3.50,  // cherry blossom
-  PALM:    4.50,  // palm tree
+  PALM:    3.80,  // palm tree — cozy (was 4.50)
 
-  // Buildings (Tripo)
-  TOWER:   4.50,  // founder tower — district landmark
-  BLD_L:   4.20,  // AI Agent Lab — main north landmark
-  BLD_M:   3.50,  // knowledge library / compute center / opportunity center
-  BLD_S:   3.50,  // team office (rawH=0.766 → use tripoH with rawH arg)
+  // Buildings (Tripo) — cozy Animal Crossing scale
+  TOWER:   7.50,  // founder tower — island landmark (was 4.50)
+  BLD_L:   5.00,  // AI Agent Lab — main north landmark (was 4.20)
+  BLD_M:   4.50,  // knowledge library / compute center / opportunity center (was 3.50)
+  BLD_S:   4.00,  // team office (rawH=0.766 → use tripoH with rawH arg) (was 3.50)
 
   // Props (Tripo)
   PIER:    1.50,  // dock pier (rawH=0.377 → use tripoH with rawH arg)
@@ -496,8 +496,8 @@ function PlazaDetails() {
   return (
     <group>
       {/* Synty fountain */}
-      <SyntyModel path="/assets/models/SM_Prop_Fountain_Base_01.glb" position={[0, 0, 0]} scale={0.012} />
-      <SyntyModel path="/assets/models/SM_Prop_Fountain_01.glb" position={[0, 0, 0]} scale={0.012} />
+      <SyntyModel path="/assets/models/SM_Prop_Fountain_Base_01.glb" position={[0, 0, 0]} scale={0.013} />
+      <SyntyModel path="/assets/models/SM_Prop_Fountain_01.glb" position={[0, 0, 0]} scale={0.013} />
       <DistrictSignBoard label="CITIZEN PLAZA" position={[0, 1.24, 3.35]} accent="#D59E45" wide />
       <InfoBoard
         title="WELCOME BOARD"
@@ -617,50 +617,50 @@ type TreePlacement = {
 
 function CampusDecor() {
   const PLAZA_SMALL_TREES: TreePlacement[] = [
-    { position: [-2.8, 0, 2.25], variant: 0, scale: 0.006, yOffset: -0.03 },
-    { position: [2.8, 0, 2.25], variant: 1, scale: 0.006, yOffset: -0.03 },
+    { position: [-2.8, 0, 2.25], variant: 0, scale: 0.0058, yOffset: -0.03 },
+    { position: [2.8, 0, 2.25], variant: 1, scale: 0.0058, yOffset: -0.03 },
     { position: [-2.95, 0, -2.2], variant: 2, scale: 0.0058, yOffset: -0.03 },
     { position: [2.95, 0, -2.2], variant: 3, scale: 0.0058, yOffset: -0.03 },
     { position: [0, 0, 3.65], variant: 0, scale: 0.0055, yOffset: -0.04 },
   ];
 
   const BETWEEN_BUILDING_TREES: TreePlacement[] = [
-    { position: [-5.8, 0, -5.3], variant: 2, scale: 0.008 },
-    { position: [5.8, 0, -5.4], variant: 1, scale: 0.008 },
-    { position: [-10.6, 0, -5.6], variant: 0, scale: 0.0085 },
-    { position: [10.6, 0, -5.6], variant: 2, scale: 0.0085 },
-    { position: [-5.9, 0, 3.5], variant: 1, scale: 0.008 },
-    { position: [5.9, 0, 3.5], variant: 0, scale: 0.008 },
-    { position: [-8.9, 0, -10.1], variant: 2, scale: 0.008 },
-    { position: [8.9, 0, -10.1], variant: 1, scale: 0.008 },
-    { position: [3.6, 0, 8.9], variant: 3, scale: 0.008 },
+    { position: [-5.8, 0, -5.3], variant: 2, scale: 0.0072 },
+    { position: [5.8, 0, -5.4], variant: 1, scale: 0.0072 },
+    { position: [-10.6, 0, -5.6], variant: 0, scale: 0.0072 },
+    { position: [10.6, 0, -5.6], variant: 2, scale: 0.0072 },
+    { position: [-5.9, 0, 3.5], variant: 1, scale: 0.0072 },
+    { position: [5.9, 0, 3.5], variant: 0, scale: 0.0072 },
+    { position: [-8.9, 0, -10.1], variant: 2, scale: 0.0072 },
+    { position: [8.9, 0, -10.1], variant: 1, scale: 0.0072 },
+    { position: [3.6, 0, 8.9], variant: 3, scale: 0.0072 },
   ];
 
   const BENCH_SHADE_TREES: TreePlacement[] = [
-    { position: [-9.8, 0, 3.8], variant: 0, scale: 0.0085 },
-    { position: [9.8, 0, 3.8], variant: 1, scale: 0.0085 },
-    { position: [-6.1, 0, -10.9], variant: 2, scale: 0.0085 },
-    { position: [6.1, 0, -10.9], variant: 0, scale: 0.0085 },
-    { position: [-3.2, 0, 9.6], variant: 1, scale: 0.008 },
+    { position: [-9.8, 0, 3.8], variant: 0, scale: 0.0075 },
+    { position: [9.8, 0, 3.8], variant: 1, scale: 0.0075 },
+    { position: [-6.1, 0, -10.9], variant: 2, scale: 0.0075 },
+    { position: [6.1, 0, -10.9], variant: 0, scale: 0.0075 },
+    { position: [-3.2, 0, 9.6], variant: 1, scale: 0.0072 },
   ];
 
   const COASTLINE_TREES: TreePlacement[] = [
-    { position: [-14.1, 0, 0.7], variant: 1, scale: 0.009 },
-    { position: [-13.5, 0, -5.5], variant: 2, scale: 0.009 },
-    { position: [-11.8, 0, -10.2], variant: 0, scale: 0.009 },
-    { position: [-5.0, 0, -13.9], variant: 2, scale: 0.009 },
-    { position: [0.6, 0, -14.2], variant: 0, scale: 0.009 },
-    { position: [5.8, 0, -13.5], variant: 1, scale: 0.009 },
-    { position: [11.9, 0, -9.4], variant: 0, scale: 0.009 },
-    { position: [14.0, 0, -4.2], variant: 1, scale: 0.009 },
-    { position: [13.9, 0, 2.6], variant: 2, scale: 0.009 },
-    { position: [12.0, 0, 8.4], variant: 1, scale: 0.009 },
-    { position: [7.3, 0, 12.1], variant: 2, scale: 0.009 },
-    { position: [1.9, 0, 13.2], variant: 0, scale: 0.0088 },
-    { position: [-4.1, 0, 13.1], variant: 1, scale: 0.0088 },
-    { position: [-9.4, 0, 11.1], variant: 2, scale: 0.009 },
-    { position: [-12.9, 0, 6.1], variant: 0, scale: 0.009 },
-    { position: [14.0, 0, -0.7], variant: 3, path: "/assets/models/SM_Env_Tree_Pine_01.glb", scale: 0.008, yOffset: 0.12 },
+    { position: [-14.1, 0, 0.7], variant: 1, scale: 0.0082 },
+    { position: [-13.5, 0, -5.5], variant: 2, scale: 0.0082 },
+    { position: [-11.8, 0, -10.2], variant: 0, scale: 0.0082 },
+    { position: [-5.0, 0, -13.9], variant: 2, scale: 0.0082 },
+    { position: [0.6, 0, -14.2], variant: 0, scale: 0.0082 },
+    { position: [5.8, 0, -13.5], variant: 1, scale: 0.0082 },
+    { position: [11.9, 0, -9.4], variant: 0, scale: 0.0082 },
+    { position: [14.0, 0, -4.2], variant: 1, scale: 0.0082 },
+    { position: [13.9, 0, 2.6], variant: 2, scale: 0.0082 },
+    { position: [12.0, 0, 8.4], variant: 1, scale: 0.0082 },
+    { position: [7.3, 0, 12.1], variant: 2, scale: 0.0082 },
+    { position: [1.9, 0, 13.2], variant: 0, scale: 0.0082 },
+    { position: [-4.1, 0, 13.1], variant: 1, scale: 0.0082 },
+    { position: [-9.4, 0, 11.1], variant: 2, scale: 0.0082 },
+    { position: [-12.9, 0, 6.1], variant: 0, scale: 0.0082 },
+    { position: [14.0, 0, -0.7], variant: 3, path: "/assets/models/SM_Env_Tree_Pine_01.glb", scale: 0.0067, yOffset: 0.12 },
   ];
 
   const treeGroups = [
@@ -1290,8 +1290,9 @@ function MeetingTable({ position, accent }: { position: Vector3Tuple; accent: st
 
 // ── Citizen Meshes ────────────────────────────────────────────────────────────
 
-// Target height in metres for all autoNorm citizens — must match scale={} prop on TripoModel
+// Target heights in metres for autoNorm citizens — must match scale={} prop on TripoModel
 const CITIZEN_TARGET_HEIGHT = 1.7
+const ROBOT_TARGET_HEIGHT   = 1.2  // cozy: robots shorter than humans
 
 const CITIZEN_MODELS_BY_TYPE: Record<string, { path: string; scale: number }> = {
   "agent-placeholder":         { path: "/assets/models/SM_Chr_RobotCitizen_01.glb",     scale: HEIGHT.ROBOT },
@@ -1319,8 +1320,10 @@ function CitizenMesh({ citizen }: { citizen: CitizenManifest }) {
   const select = useCampusStore((state) => state.select);
   const [x, , z] = citizen.location.coordinates;
   const isComputeDevice = citizen.avatar_type === "device-placeholder";
+  const isRobot = citizen.avatar_type === "agent-placeholder";
   const tripoModel = getCitizenModel(citizen);
-  const labelBaseY = isComputeDevice ? HEIGHT.DEVICE : (tripoModel ? CITIZEN_TARGET_HEIGHT + 0.2 : 1.35)
+  const citizenTargetH = isRobot ? ROBOT_TARGET_HEIGHT : CITIZEN_TARGET_HEIGHT
+  const labelBaseY = isComputeDevice ? HEIGHT.DEVICE : (tripoModel ? citizenTargetH + 0.2 : 1.35)
   const typeColor = getCitizenTypeColor(citizen.citizen_type)
 
   return (
@@ -1342,7 +1345,7 @@ function CitizenMesh({ citizen }: { citizen: CitizenManifest }) {
             </mesh>
           </>
         ) : tripoModel ? (
-          <TripoModel path={tripoModel.path} scale={CITIZEN_TARGET_HEIGHT} autoNorm position={[0, 0, 0]} />
+          <TripoModel path={tripoModel.path} scale={citizenTargetH} autoNorm position={[0, 0, 0]} />
         ) : (
           // Fallback procedural human
           <>
