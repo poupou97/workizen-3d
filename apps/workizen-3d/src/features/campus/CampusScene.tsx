@@ -1499,13 +1499,9 @@ function SceneContents() {
       {npcs.map((npc) => (
         <NpcMesh key={npc.id} npc={npc} />
       ))}
-      {/* DEBUG: chỉ render device-placeholder (procedural) + agent-placeholder (Robot) */}
-      {/* DEBUG: chỉ 1 placeholder citizen */}
-      {citizens
-        .filter(c => c.citizen_id === "human-plaza-01")
-        .map((citizen) => (
-          <CitizenMesh key={citizen.citizen_id} citizen={citizen} />
-        ))}
+      {citizens.map((citizen) => (
+        <CitizenMesh key={citizen.citizen_id} citizen={citizen} />
+      ))}
     </group>
   );
 }
