@@ -487,14 +487,6 @@ function PlazaDetails() {
         position={[2.75, 0, 2.6]}
         accent="#22C55E"
       />
-      {/* Benches */}
-      {(
-        [
-          [-1.55, 0, -1.95, 0]
-        ] as [number, number, number, number][]
-      ).map(([x, y, z, rotation], index) => (
-        <Bench key={index} position={[x, y, z]} rotation={rotation} />
-      ))}
       {/* Lamps */}
       {(
         [
@@ -638,25 +630,25 @@ function CampusDecor() {
   const lamps: Vector3Tuple[] = [
     // Inner ring (r≈4) — plaza perimeter, flanking the info boards
     [-2.1, 0, 3.3], [2.1, 0, 3.3],
-    // Middle ring (r≈5.5-6) — main path corridors radiating from fountain
-    [0, 0, -5.5],          // N path → AI Agent Lab
-    [-4.0, 0, -3.8],       // NW diagonal → Founder Tower
-    [4.0, 0, -3.8],        // NE diagonal → Knowledge Library
-    [-5.8, 0, 0],          // W axis → Opportunity Center
-    [5.8, 0, 0],           // E axis → Compute Center
-    [0, 0, 5.8],           // S axis → Team Office
-    // Outer ring (r≈7-9) — building approach lighting
-    [-7.0, 0, -6.2],       // Founder Tower approach
-    [7.0, 0, -6.2],        // Knowledge Library approach
+    // Middle ring — rotated 15° clockwise around center
+    [1.6, 0, -6.0],        // AI Agent Lab
+    [-5.7, 0, -9.1],       // Founder Tower
+    [8.2, 0, -4.3],        // Knowledge Library
+    [-5.9, 0, -1.2],       // Opportunity Center
+    [5.7, 0, 1.9],         // Compute Center
+  ];
+
+  const outerLamps: Vector3Tuple[] = [
+    // Outer ring — đằng sau Founder/Knowledge Library, gần bãi cát, hướng ra ngoài
+    [-8.7, 0, -11.7],      // behind Founder Tower
+    [7.8, 0, -10.5],       // behind Knowledge Library
   ];
 
   const benches: { position: Vector3Tuple; rotation: number }[] = [
-    // AI Agent Lab: 1 bench beside approach path
-    { position: [-1.9, 0, -5.5], rotation: 0 },
-    // Founder Tower: 1 bench beside tower path
-    { position: [-8.6, 0, -6.9], rotation: Math.PI / 2 },
-    // Knowledge Library: 1 bench symmetric to Founder
-    { position: [8.6, 0, -6.9], rotation: -Math.PI / 2 },
+    // Founder Tower: 1 bench, 4m from south wall, face island center [0,0,0]
+    { position: [-8.6, 0, -3.375], rotation: Math.atan2(8.6, 3.375) },
+    // Knowledge Library: 1 bench, 4m from south wall, face island center [0,0,0]
+    { position: [8.6, 0, -3.375], rotation: Math.atan2(-8.6, 3.375) },
     // Opportunity Center: 10m from building, face building (away from pier)
     { position: [-8.7, 0, 10], rotation: Math.atan2(8.7, 12.8) + Math.PI },
     // Compute Center: 10m from building, face building (away from pier)
@@ -740,6 +732,9 @@ function CampusDecor() {
       ))}
       {lamps.map((position, index) => (
         <Lamp key={index} position={position} />
+      ))}
+      {outerLamps.map((position, index) => (
+        <Lamp key={`outer-${index}`} position={position} rotationOffset={Math.PI} />
       ))}
       {benches.map(({ position, rotation }, index) => (
         <Bench key={index} position={position} rotation={rotation} />
@@ -1162,10 +1157,10 @@ function Bench({ position, rotation }: { position: Vector3Tuple; rotation: numbe
   )
 }
 
-function Lamp({ position }: { position: Vector3Tuple }) {
+function Lamp({ position, rotationOffset = 0 }: { position: Vector3Tuple; rotationOffset?: number }) {
   const [px, , pz] = position
   // Rotate lamp arm to face island center [0,0]. Synty models face +Z by default.
-  const yaw = Math.atan2(-px, -pz)
+  const yaw = Math.atan2(-px, -pz) + rotationOffset
   return (
     <SyntyModel
       path="/assets/models/SM_Prop_Streetlamp_01.glb"
@@ -1342,7 +1337,6 @@ const OBSTACLE_ZONES: ObstacleZone[] = [
   { id: "plaza-welcome-board", type: "rect", position: [-2.75, 0, 2.6], size: [1.55, 0.72] },
   { id: "plaza-campus-map-board", type: "rect", position: [1.1, 0, 3.05], size: [1.7, 0.76] },
   { id: "plaza-registry-board", type: "rect", position: [2.75, 0, 2.6], size: [1.55, 0.72] },
-  { id: "plaza-south-bench", type: "rect", position: [-1.55, 0, -1.95], size: [1.65, 0.72] },
   // District boards / large props
   { id: "opportunity-board", type: "rect", position: [-5.5, 0, 0.75], size: [1.75, 0.82] },
   { id: "compute-screen", type: "rect", position: [8.7, 0, 2.1], size: [1.5, 0.82] },
