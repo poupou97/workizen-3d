@@ -636,40 +636,34 @@ function CampusDecor() {
   ];
 
   const lamps: Vector3Tuple[] = [
-    // Major paths outside the central plaza ring
-    [-0.85, 0, -4.9], [0.85, 0, -4.9],
-    [-5.1, 0, 0], [-6.9, 0, 0],
-    [5.1, 0, 0], [6.9, 0, 0],
-    [0, 0, 5.1],
-    [-4.85, 0, -4.85],
-    [4.85, 0, -4.85]
+    // Inner ring (r≈4) — plaza perimeter, flanking the info boards
+    [-2.1, 0, 3.3], [2.1, 0, 3.3],
+    // Middle ring (r≈5.5-6) — main path corridors radiating from fountain
+    [0, 0, -5.5],          // N path → AI Agent Lab
+    [-4.0, 0, -3.8],       // NW diagonal → Founder Tower
+    [4.0, 0, -3.8],        // NE diagonal → Knowledge Library
+    [-5.8, 0, 0],          // W axis → Opportunity Center
+    [5.8, 0, 0],           // E axis → Compute Center
+    [0, 0, 5.8],           // S axis → Team Office
+    // Outer ring (r≈7-9) — building approach lighting
+    [-7.0, 0, -6.2],       // Founder Tower approach
+    [7.0, 0, -6.2],        // Knowledge Library approach
   ];
 
   const benches: { position: Vector3Tuple; rotation: number }[] = [
-    // AI Agent Lab surroundings
+    // AI Agent Lab: 1 bench beside approach path
     { position: [-1.9, 0, -5.5], rotation: 0 },
-    { position: [1.9, 0, -5.5], rotation: 0 },
-    { position: [-3.3, 0, -6.9], rotation: Math.PI / 4 },
-    // Founder Tower surroundings
+    // Founder Tower: 1 bench beside tower path
     { position: [-8.6, 0, -6.9], rotation: Math.PI / 2 },
-    { position: [-7.2, 0, -10.6], rotation: 0 },
-    { position: [-5.6, 0, -9.6], rotation: Math.PI / 6 },
-    // Knowledge Library surroundings
+    // Knowledge Library: 1 bench symmetric to Founder
     { position: [8.6, 0, -6.9], rotation: -Math.PI / 2 },
-    { position: [7.2, 0, -10.6], rotation: 0 },
-    { position: [5.6, 0, -9.6], rotation: -Math.PI / 6 },
-    // Opportunity Center surroundings
+    // Opportunity Center: 1 bench beside center
     { position: [-9.6, 0, 2.9], rotation: Math.PI / 2 },
-    { position: [-7.6, 0, 3.3], rotation: 0 },
-    { position: [-6.6, 0, 2.6], rotation: Math.PI / 2 },
-    // Compute Center surroundings
+    // Compute Center: 1 bench symmetric to Opportunity
     { position: [9.6, 0, 2.9], rotation: -Math.PI / 2 },
-    { position: [7.6, 0, 3.3], rotation: 0 },
-    { position: [6.6, 0, 2.6], rotation: -Math.PI / 2 },
-    // Team Office surroundings
+    // Team Office: 2 benches flanking entrance path
     { position: [2.3, 0, 5.1], rotation: -Math.PI / 2 },
     { position: [-2.3, 0, 5.1], rotation: Math.PI / 2 },
-    { position: [0, 0, 9.6], rotation: 0 }
   ];
 
   const flowers: { position: Vector3Tuple; color: string }[] = [
@@ -1169,10 +1163,14 @@ function Bench({ position, rotation }: { position: Vector3Tuple; rotation: numbe
 }
 
 function Lamp({ position }: { position: Vector3Tuple }) {
+  const [px, , pz] = position
+  // Rotate lamp arm to face island center [0,0]. Synty models face +Z by default.
+  const yaw = Math.atan2(-px, -pz)
   return (
     <SyntyModel
       path="/assets/models/SM_Prop_Streetlamp_01.glb"
       position={position}
+      rotation={[0, yaw, 0]}
       scale={0.007}
     />
   )
@@ -1470,10 +1468,19 @@ function pickIdleDuration(): number {
   return IDLE_DURATIONS_S[Math.floor(Math.random() * IDLE_DURATIONS_S.length)]
 }
 
+// Ellipse approximation of the inner grass area — citizens must stay within this.
+// innerGrassShape uses radiusX=13.4, radiusZ=11.5; we keep a safe margin inside.
+function isPointInsideIsland(x: number, z: number): boolean {
+  const rx = 11.5
+  const rz = 10.0
+  return (x * x) / (rx * rx) + (z * z) / (rz * rz) < 1.0
+}
+
 function getWanderRoute(startPos: Vector3Tuple, seed: number): AmbientWaypoint[] {
+  const safePois = WANDER_POIS.filter(p => isPointInsideIsland(p.position[0], p.position[2]))
   return [
     { id: "wanderer-home", position: startPos, waitSeconds: pickIdleDuration() },
-    ...rotateWaypoints(WANDER_POIS, seed % WANDER_POIS.length),
+    ...rotateWaypoints(safePois, seed % Math.max(safePois.length, 1)),
   ]
 }
 
@@ -1723,8 +1730,14 @@ function AnimatedWandererMesh({
 
     const obstacleRecovery = getObstaclePushVector(state.position)
     if (obstacleRecovery.lengthSq() > 0.0001) {
-      obstacleRecovery.normalize()
-      state.position.addScaledVector(obstacleRecovery, delta * 0.55)
+      const recovered = state.position.clone().addScaledVector(obstacleRecovery.normalize(), delta * 0.55)
+      if (isPointInsideIsland(recovered.x, recovered.z)) {
+        state.position.copy(recovered)
+      } else {
+        // Recovery would leave island — nudge toward origin instead
+        const toCenter = new THREE.Vector3(-state.position.x, 0, -state.position.z).normalize()
+        state.position.addScaledVector(toCenter, delta * 0.55)
+      }
       moverRef.current.position.copy(state.position)
       citizenPositionRegistry.set(citizenId, state.position.clone())
       isMovingRef.current = false
@@ -1776,7 +1789,7 @@ function AnimatedWandererMesh({
     if (obstPush.lengthSq() > 0.0001) proposed.addScaledVector(obstPush.normalize(), delta * 0.62)
     if (citizenPush.lengthSq() > 0.0001) proposed.addScaledVector(citizenPush.normalize(), delta * 0.38)
 
-    if (isPointBlocked(proposed)) {
+    if (isPointBlocked(proposed) || !isPointInsideIsland(proposed.x, proposed.z)) {
       state.waypointIndex = (state.waypointIndex + 1) % wanderRoute.length
       state.waitSeconds = 0.35
       isMovingRef.current = false
