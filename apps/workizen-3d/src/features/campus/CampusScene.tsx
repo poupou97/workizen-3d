@@ -1,9 +1,10 @@
 "use client";
 
-import { Float, OrbitControls, PerspectiveCamera, Text, useGLTF, useTexture } from "@react-three/drei";
+import { Float, OrbitControls, PerspectiveCamera, Text, useAnimations, useGLTF, useTexture } from "@react-three/drei";
 import { Canvas, ThreeEvent, useFrame } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import { clone as cloneSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { artDirection } from "./artDirection";
 import { citizens, districts, npcs, opportunities } from "./data";
 import { useCampusStore } from "./store";
@@ -151,6 +152,12 @@ SYNTY_TREE_PATHS.forEach(p => useGLTF.preload(p))
   "/assets/animations/Talking.glb",
   "/assets/animations/Pointing.glb",
 ].forEach(p => useGLTF.preload(p))
+
+// Tripo-native animated wanderer assets (Layla Chen + Workizen Guide)
+const ANIM_IDLE_PATH = "/assets/rigged/layla-chen/animations/Idle.glb" as const
+const ANIM_WALK_PATH = "/assets/rigged/layla-chen/animations/Walk.glb" as const
+useGLTF.preload(ANIM_IDLE_PATH)
+useGLTF.preload(ANIM_WALK_PATH)
 
 function SyntyModel({
   path,
@@ -1436,6 +1443,40 @@ function getAmbientRoute(citizen: CitizenManifest): AmbientWaypoint[] {
   ]
 }
 
+// ── POI Wander System (cross-district, animated citizens only) ─────────────────
+
+const IDLE_DURATIONS_S = [2, 5, 10] as const  // idle_short / idle_medium / idle_long
+
+const WANDER_POIS: AmbientWaypoint[] = [
+  { id: "wp-plaza-fountain-w",  position: [-1.35, 0, -0.25], lookAt: [0, 0, 0] },
+  { id: "wp-plaza-campus-map",  position: [-0.55, 0,  2.15], lookAt: [0, 0, 3.05] },
+  { id: "wp-plaza-registry",    position: [ 1.95, 0,  1.55], lookAt: [2.75, 0, 2.6] },
+  { id: "wp-plaza-south",       position: [ 0.20, 0, -2.45], lookAt: [0, 0, 0] },
+  { id: "wp-ai-lab-path",       position: [ 0.00, 0, -4.25], lookAt: [0, 0, -8.8] },
+  { id: "wp-ai-lab-left",       position: [-2.20, 0, -5.10], lookAt: [0, 0, -8.8] },
+  { id: "wp-founder-entry",     position: [-7.10, 0, -6.25], lookAt: [-7.8, 0, -8.6] },
+  { id: "wp-founder-path",      position: [-6.05, 0, -7.45], lookAt: [-7.8, 0, -8.6] },
+  { id: "wp-knowledge-entry",   position: [ 6.10, 0, -6.25], lookAt: [7.8, 0, -8.6] },
+  { id: "wp-knowledge-shelf",   position: [ 5.10, 0, -5.80], lookAt: [6.0, 0, -6.85] },
+  { id: "wp-opportunity-board", position: [-7.00, 0,  1.05], lookAt: [-6.0, 0, 0.75] },
+  { id: "wp-opportunity-path",  position: [-6.25, 0,  2.25], lookAt: [-8.7, 0, 0.35] },
+  { id: "wp-compute-entry",     position: [ 7.00, 0,  1.25], lookAt: [8.7, 0, 0.35] },
+  { id: "wp-compute-pond",      position: [ 6.55, 0,  2.55], lookAt: [6.7, 0, 5.7] },
+  { id: "wp-team-entry",        position: [-1.45, 0,  4.65], lookAt: [0, 0, 7.7] },
+  { id: "wp-team-table",        position: [ 0.00, 0,  4.25], lookAt: [0, 0, 7.7] },
+]
+
+function pickIdleDuration(): number {
+  return IDLE_DURATIONS_S[Math.floor(Math.random() * IDLE_DURATIONS_S.length)]
+}
+
+function getWanderRoute(startPos: Vector3Tuple, seed: number): AmbientWaypoint[] {
+  return [
+    { id: "wanderer-home", position: startPos, waitSeconds: pickIdleDuration() },
+    ...rotateWaypoints(WANDER_POIS, seed % WANDER_POIS.length),
+  ]
+}
+
 const citizenPositionRegistry = new Map<string, THREE.Vector3>()
 
 function isPointInObstacle(point: Vector3Tuple | THREE.Vector3, zone: ObstacleZone, padding = OBSTACLE_PADDING) {
@@ -1580,7 +1621,193 @@ function getCitizenModel(citizen: CitizenManifest): { path: string; scale: numbe
   return undefined
 }
 
-function CitizenMesh({ citizen }: { citizen: CitizenManifest }) {
+// ── Animated Wanderer (Layla Chen + Workizen Guide) ───────────────────────────
+
+function AnimatedWandererBody({
+  isMovingRef,
+}: {
+  isMovingRef: { current: boolean }
+}) {
+  const idleGroupRef = useRef<THREE.Group>(null)
+  const walkGroupRef = useRef<THREE.Group>(null)
+
+  const idleGltf = useGLTF(ANIM_IDLE_PATH)
+  const walkGltf = useGLTF(ANIM_WALK_PATH)
+
+  const idleClone = useMemo(() => cloneSkeleton(idleGltf.scene), [idleGltf.scene])
+  const walkClone = useMemo(() => cloneSkeleton(walkGltf.scene), [walkGltf.scene])
+
+  const { scaleFactor, groundOffset } = useMemo(() => {
+    const sc = idleGltf.scene
+    sc.updateMatrixWorld(true)
+    const box = new THREE.Box3().setFromObject(sc)
+    const h = Math.max(box.max.y - box.min.y, 0.001)
+    const sf = CITIZEN_TARGET_HEIGHT / h
+    return { scaleFactor: sf, groundOffset: -box.min.y * sf }
+  }, [idleGltf.scene])
+
+  const { actions: idleActions } = useAnimations(idleGltf.animations, idleGroupRef)
+  const { actions: walkActions } = useAnimations(walkGltf.animations, walkGroupRef)
+
+  useEffect(() => {
+    const clip = idleGltf.animations[0]
+    if (clip) idleActions[clip.name]?.reset().setLoop(THREE.LoopRepeat, Infinity).play()
+  }, [idleActions, idleGltf.animations])
+
+  useEffect(() => {
+    const clip = walkGltf.animations[0]
+    if (clip) walkActions[clip.name]?.reset().setLoop(THREE.LoopRepeat, Infinity).play()
+  }, [walkActions, walkGltf.animations])
+
+  // Toggle visibility directly on Three.js objects — zero React re-renders
+  useFrame(() => {
+    if (idleGroupRef.current) idleGroupRef.current.visible = !isMovingRef.current
+    if (walkGroupRef.current) walkGroupRef.current.visible = isMovingRef.current
+  })
+
+  return (
+    <>
+      <group ref={idleGroupRef} position={[0, groundOffset, 0]} scale={scaleFactor}>
+        <primitive object={idleClone} />
+      </group>
+      <group ref={walkGroupRef} position={[0, groundOffset, 0]} scale={scaleFactor}>
+        <primitive object={walkClone} />
+      </group>
+    </>
+  )
+}
+
+function AnimatedWandererMesh({
+  citizenId,
+  startPosition,
+  name,
+  accentColor,
+  onSelect,
+}: {
+  citizenId: string
+  startPosition: Vector3Tuple
+  name: string
+  accentColor: string
+  onSelect: () => void
+}) {
+  const [x, , z] = startPosition
+  const moverRef = useRef<THREE.Group>(null)
+  const modelShellRef = useRef<THREE.Group>(null)
+  const isMovingRef = useRef(false)
+
+  const seed = hashCitizenId(citizenId)
+  const wanderRoute = useMemo(() => getWanderRoute(startPosition, seed), [startPosition, seed])
+
+  const ambientState = useRef({
+    position: new THREE.Vector3(x, 0, z),
+    waypointIndex: 1,
+    waitSeconds: wanderRoute[0]?.waitSeconds ?? pickIdleDuration(),
+    waitLookAt: undefined as Vector3Tuple | undefined,
+    speed: 0.26 + (seed % 5) * 0.025,
+  })
+
+  useEffect(() => {
+    ambientState.current.position.set(x, 0, z)
+    ambientState.current.waypointIndex = 1
+    moverRef.current?.position.set(x, 0, z)
+    citizenPositionRegistry.set(citizenId, ambientState.current.position.clone())
+  }, [citizenId, x, z])
+
+  useEffect(() => {
+    return () => { citizenPositionRegistry.delete(citizenId) }
+  }, [citizenId])
+
+  useFrame((_, delta) => {
+    if (!moverRef.current || wanderRoute.length === 0) return
+    const state = ambientState.current
+
+    const obstacleRecovery = getObstaclePushVector(state.position)
+    if (obstacleRecovery.lengthSq() > 0.0001) {
+      obstacleRecovery.normalize()
+      state.position.addScaledVector(obstacleRecovery, delta * 0.55)
+      moverRef.current.position.copy(state.position)
+      citizenPositionRegistry.set(citizenId, state.position.clone())
+      isMovingRef.current = false
+      return
+    }
+
+    const reachable = findReachableWaypoint(wanderRoute, state.waypointIndex, state.position)
+    if (!reachable) {
+      state.waitSeconds = Math.max(state.waitSeconds, 0.5)
+      isMovingRef.current = false
+      citizenPositionRegistry.set(citizenId, state.position.clone())
+      return
+    }
+
+    state.waypointIndex = reachable.index
+    const waypoint = reachable.waypoint
+
+    if (state.waitSeconds > 0) {
+      state.waitSeconds = Math.max(0, state.waitSeconds - delta)
+      isMovingRef.current = false
+      const yaw = state.waitLookAt ? yawToward(state.position, state.waitLookAt) : undefined
+      if (yaw !== undefined && modelShellRef.current) {
+        modelShellRef.current.rotation.y += shortestAngleDelta(modelShellRef.current.rotation.y, yaw) * Math.min(1, delta * 4)
+      }
+      if (state.waitSeconds === 0) state.waitLookAt = undefined
+      citizenPositionRegistry.set(citizenId, state.position.clone())
+      return
+    }
+
+    const target = new THREE.Vector3(...waypoint.position)
+    const direction = target.sub(state.position)
+    const distance = direction.length()
+
+    if (distance < 0.045) {
+      state.position.set(...waypoint.position)
+      moverRef.current.position.copy(state.position)
+      state.waypointIndex = (state.waypointIndex + 1) % wanderRoute.length
+      state.waitSeconds = pickIdleDuration()
+      state.waitLookAt = waypoint.lookAt
+      isMovingRef.current = false
+      citizenPositionRegistry.set(citizenId, state.position.clone())
+      return
+    }
+
+    direction.normalize()
+    const proposed = state.position.clone().addScaledVector(direction, Math.min(distance, state.speed * delta))
+    const obstPush = getObstaclePushVector(proposed)
+    const citizenPush = getCitizenAvoidanceVector(citizenId, proposed)
+    if (obstPush.lengthSq() > 0.0001) proposed.addScaledVector(obstPush.normalize(), delta * 0.62)
+    if (citizenPush.lengthSq() > 0.0001) proposed.addScaledVector(citizenPush.normalize(), delta * 0.38)
+
+    if (isPointBlocked(proposed)) {
+      state.waypointIndex = (state.waypointIndex + 1) % wanderRoute.length
+      state.waitSeconds = 0.35
+      isMovingRef.current = false
+      citizenPositionRegistry.set(citizenId, state.position.clone())
+      return
+    }
+
+    state.position.copy(proposed)
+    moverRef.current.position.copy(state.position)
+    citizenPositionRegistry.set(citizenId, state.position.clone())
+    isMovingRef.current = true
+
+    if (modelShellRef.current) {
+      const yaw = Math.atan2(-direction.z, direction.x)
+      modelShellRef.current.rotation.y += shortestAngleDelta(modelShellRef.current.rotation.y, yaw) * Math.min(1, delta * 6)
+    }
+  })
+
+  return (
+    <group ref={moverRef} position={[x, 0, z]} onClick={(event) => stopAndRun(event, onSelect)}>
+      <group ref={modelShellRef}>
+        <Suspense fallback={null}>
+          <AnimatedWandererBody isMovingRef={isMovingRef} />
+        </Suspense>
+      </group>
+      <Label text={name} position={[0, CITIZEN_TARGET_HEIGHT + 0.2, 0]} color={accentColor} small />
+    </group>
+  )
+}
+
+function LegacyCitizenMesh({ citizen }: { citizen: CitizenManifest }) {
   const select = useCampusStore((state) => state.select);
   const [x, , z] = citizen.location.coordinates;
   const moverRef = useRef<THREE.Group>(null)
@@ -1753,6 +1980,22 @@ function CitizenMesh({ citizen }: { citizen: CitizenManifest }) {
   );
 }
 
+function CitizenMesh({ citizen }: { citizen: CitizenManifest }) {
+  const select = useCampusStore((state) => state.select)
+  if (citizen.citizen_id === "human-plaza-01") {
+    return (
+      <AnimatedWandererMesh
+        citizenId={citizen.citizen_id}
+        startPosition={citizen.location.coordinates}
+        name={citizen.name}
+        accentColor={citizen.accentColor}
+        onSelect={() => select({ kind: "citizen", id: citizen.citizen_id })}
+      />
+    )
+  }
+  return <LegacyCitizenMesh citizen={citizen} />
+}
+
 function getCitizenTypeColor(type: CitizenManifest["citizen_type"]) {
   if (type === "AI Citizen") return "#22C55E"
   if (type === "Knowledge Citizen") return "#F59E0B"
@@ -1786,6 +2029,17 @@ function CitizenTypeBadge({
 
 function NpcMesh({ npc }: { npc: Npc }) {
   const select = useCampusStore((state) => state.select);
+  if (npc.id === "workizen-guide") {
+    return (
+      <AnimatedWandererMesh
+        citizenId={npc.id}
+        startPosition={npc.position}
+        name={npc.name}
+        accentColor={npc.accentColor}
+        onSelect={() => select({ kind: "npc", id: npc.id })}
+      />
+    )
+  }
   const [x, , z] = npc.position;
 
   return (
