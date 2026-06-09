@@ -657,13 +657,13 @@ function CampusDecor() {
     { position: [-8.6, 0, -6.9], rotation: Math.PI / 2 },
     // Knowledge Library: 1 bench symmetric to Founder
     { position: [8.6, 0, -6.9], rotation: -Math.PI / 2 },
-    // Opportunity Center: 1 bench beside center
-    { position: [-9.6, 0, 2.9], rotation: Math.PI / 2 },
-    // Compute Center: 1 bench symmetric to Opportunity
-    { position: [9.6, 0, 2.9], rotation: -Math.PI / 2 },
-    // Team Office: 2 benches flanking entrance path
-    { position: [2.3, 0, 5.1], rotation: -Math.PI / 2 },
-    { position: [-2.3, 0, 5.1], rotation: Math.PI / 2 },
+    // Opportunity Center: 10m from building, face building (away from pier)
+    { position: [-8.7, 0, 10], rotation: Math.atan2(8.7, 12.8) + Math.PI },
+    // Compute Center: 10m from building, face building (away from pier)
+    { position: [8.7, 0, 10], rotation: Math.atan2(-8.7, 12.8) + Math.PI },
+    // Team Office: 2 benches flanking entrance, 6.6m apart, facing outward
+    { position: [3.3, 0, 6.675], rotation: Math.PI / 2 },
+    { position: [-3.3, 0, 6.675], rotation: -Math.PI / 2 },
   ];
 
   const flowers: { position: Vector3Tuple; color: string }[] = [
