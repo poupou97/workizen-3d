@@ -1,10 +1,9 @@
 "use client";
 
-import { Float, OrbitControls, PerspectiveCamera, Text, useAnimations, useGLTF, useTexture } from "@react-three/drei";
+import { Float, OrbitControls, PerspectiveCamera, Text, useGLTF, useTexture } from "@react-three/drei";
 import { Canvas, ThreeEvent, useFrame } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { clone as cloneSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { artDirection } from "./artDirection";
 import { citizens, districts, npcs, opportunities } from "./data";
 import { useCampusStore } from "./store";
@@ -308,42 +307,6 @@ function createOrganicIslandShape(radiusX: number, radiusZ: number, wobble = 0.0
   }
 
   return shape
-}
-
-// AnimatedModel: rigged GLB (_Rigged.glb từ auto-rig-characters.mjs) + Mixamo animation clip
-function AnimatedModel({
-  modelPath,
-  animPath,
-  clipName,
-  position,
-  scale = 1.0,
-  rotation,
-}: {
-  modelPath: string
-  animPath: string
-  clipName?: string
-  position: Vector3Tuple
-  scale?: number
-  rotation?: [number, number, number]
-}) {
-  const group = useRef<THREE.Group>(null!)
-  const { scene } = useGLTF(modelPath)
-  const { animations } = useGLTF(animPath)
-  const cloned = useMemo(() => cloneSkeleton(scene), [scene])
-  const { actions } = useAnimations(animations, group)
-
-  useEffect(() => {
-    const name = clipName ?? Object.keys(actions)[0]
-    if (name && actions[name]) actions[name].reset().fadeIn(0.3).play()
-    return () => { Object.values(actions).forEach(a => a?.stop()) }
-  }, [actions, clipName])
-
-  const [x, y, z] = position
-  return (
-    <group ref={group} position={[x, y, z]} scale={scale} rotation={rotation ?? [0, 0, 0]}>
-      <primitive object={cloned} />
-    </group>
-  )
 }
 
 // ── Ground & Paths ────────────────────────────────────────────────────────────
