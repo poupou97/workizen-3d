@@ -478,7 +478,7 @@ function PlazaDetails() {
       <InfoBoard
         title="CAMPUS MAP"
         lines={["AI · Founder · Library", "Opportunity · Compute", "Team Office"]}
-        position={[0, 0, 3.05]}
+        position={[1.1, 0, 3.05]}
         accent="#2563EB"
       />
       <InfoBoard
@@ -490,7 +490,7 @@ function PlazaDetails() {
       {/* Benches */}
       {(
         [
-          [0, 0, -1.95, 0]
+          [-1.55, 0, -1.95, 0]
         ] as [number, number, number, number][]
       ).map(([x, y, z, rotation], index) => (
         <Bench key={index} position={[x, y, z]} rotation={rotation} />
@@ -668,8 +668,8 @@ function CampusDecor() {
 
   const flowers: { position: Vector3Tuple; color: string }[] = [
     // ── Original 8 flower patches (kept, re-colored) ──
-    { position: [-3.4, 0, -0.2], color: "#F9A8D4" },
-    { position: [3.4, 0, -0.2], color: "#FDE68A" },
+    { position: [-3.4, 0, -0.9], color: "#F9A8D4" },
+    { position: [3.4, 0, -0.9], color: "#FDE68A" },
     { position: [-1.95, 0, -3.15], color: "#A7F3D0" },
     { position: [1.95, 0, -3.15], color: "#FDE68A" },
     { position: [-9.95, 0, -1.85], color: "#F9A8D4" },
@@ -679,9 +679,9 @@ function CampusDecor() {
     // ── Extra plaza-ring flowers (5) ──
     { position: [-3.05, 0, 1.85], color: "#FDE68A" },
     { position: [3.05, 0, 1.85], color: "#F9A8D4" },
-    { position: [0, 0, -3.3], color: "#A7F3D0" },
-    { position: [2.65, 0, -2.65], color: "#FDE68A" },
-    { position: [-2.65, 0, -2.65], color: "#F9A8D4" },
+    { position: [-0.9, 0, -3.3], color: "#A7F3D0" },
+    { position: [4.0, 0, -2.0], color: "#FDE68A" },
+    { position: [-4.0, 0, -2.0], color: "#F9A8D4" },
     // ── Around AI Agent Lab (4) ──
     { position: [-2.9, 0, -5.6], color: "#A7F3D0" },
     { position: [2.9, 0, -5.6], color: "#A7F3D0" },
@@ -708,23 +708,23 @@ function CampusDecor() {
     { position: [-2.6, 0, 4.6], color: "#E9D5FF" },
     { position: [0, 0, 9.3], color: "#DDD6FE" },
     // ── Path-side flowers (4) ──
-    { position: [-1.55, 0, -1.6], color: "#FDE68A" },
-    { position: [1.55, 0, -1.6], color: "#F9A8D4" },
+    { position: [-2.5, 0, -1.0], color: "#FDE68A" },
+    { position: [2.5, 0, -1.0], color: "#F9A8D4" },
     { position: [-1.55, 0, 1.6], color: "#A7F3D0" },
     { position: [1.55, 0, 1.6], color: "#FDE68A" },
     // ── Phase 2F.9 Citizen Plaza garden clusters replacing central hedges (18) ──
     { position: [-3.45, 0, -1.15], color: "#FDE68A" },
     { position: [-3.7, 0, -0.78], color: "#F8FAFC" },
-    { position: [-3.35, 0, -0.52], color: "#BAE6FD" },
+    { position: [-3.35, 0, -1.05], color: "#BAE6FD" },
     { position: [3.45, 0, -1.15], color: "#FDE68A" },
     { position: [3.7, 0, -0.78], color: "#F8FAFC" },
-    { position: [3.35, 0, -0.52], color: "#BAE6FD" },
+    { position: [3.35, 0, -1.05], color: "#BAE6FD" },
     { position: [-3.45, 0, 1.15], color: "#FEF3C7" },
     { position: [-3.72, 0, 0.76], color: "#FFFFFF" },
-    { position: [-3.3, 0, 0.48], color: "#CFFAFE" },
+    { position: [-3.3, 0, 1.1], color: "#CFFAFE" },
     { position: [3.45, 0, 1.15], color: "#FEF3C7" },
     { position: [3.72, 0, 0.76], color: "#FFFFFF" },
-    { position: [3.3, 0, 0.48], color: "#CFFAFE" },
+    { position: [3.3, 0, 1.1], color: "#CFFAFE" },
     { position: [-1.18, 0, -3.48], color: "#FDE68A" },
     { position: [-0.72, 0, -3.68], color: "#F8FAFC" },
     { position: [-1.55, 0, -3.2], color: "#BAE6FD" },
@@ -748,8 +748,8 @@ function CampusDecor() {
         <FlowerPatch key={index} position={position} color={color} />
       ))}
       {/* Small shrubs only, replacing hedge mass without blocking sightlines */}
-      <SmallShrub position={[-3.72, 0, -0.18]} />
-      <SmallShrub position={[3.72, 0, -0.18]} />
+      <SmallShrub position={[-3.72, 0, -1.1]} />
+      <SmallShrub position={[3.72, 0, -1.1]} />
       <SmallShrub position={[-3.72, 0, 1.72]} />
       <SmallShrub position={[3.72, 0, 1.72]} />
       <SmallShrub position={[-1.9, 0, -3.48]} />
@@ -1340,9 +1340,9 @@ const OBSTACLE_ZONES: ObstacleZone[] = [
   // Plaza core props and boards
   { id: "plaza-fountain", type: "circle", position: [0, 0, 0], radius: 1.05 },
   { id: "plaza-welcome-board", type: "rect", position: [-2.75, 0, 2.6], size: [1.55, 0.72] },
-  { id: "plaza-campus-map-board", type: "rect", position: [0, 0, 3.05], size: [1.7, 0.76] },
+  { id: "plaza-campus-map-board", type: "rect", position: [1.1, 0, 3.05], size: [1.7, 0.76] },
   { id: "plaza-registry-board", type: "rect", position: [2.75, 0, 2.6], size: [1.55, 0.72] },
-  { id: "plaza-south-bench", type: "rect", position: [0, 0, -1.95], size: [1.65, 0.72] },
+  { id: "plaza-south-bench", type: "rect", position: [-1.55, 0, -1.95], size: [1.65, 0.72] },
   // District boards / large props
   { id: "opportunity-board", type: "rect", position: [-5.5, 0, 0.75], size: [1.75, 0.82] },
   { id: "compute-screen", type: "rect", position: [8.7, 0, 2.1], size: [1.5, 0.82] },
@@ -1368,7 +1368,7 @@ const AMBIENT_WAYPOINTS_BY_DISTRICT: Record<string, AmbientWaypoint[]> = {
   "Citizen Plaza": [
     { id: "plaza-fountain-west", position: [-1.35, 0, -0.25], lookAt: [0, 0, 0], waitSeconds: 3, district: "Citizen Plaza" },
     { id: "plaza-welcome", position: [-1.95, 0, 1.45], lookAt: [-2.75, 0, 2.6], waitSeconds: 4, district: "Citizen Plaza" },
-    { id: "plaza-campus-map", position: [-0.55, 0, 2.15], lookAt: [0, 0, 3.05], waitSeconds: 4, district: "Citizen Plaza" },
+    { id: "plaza-campus-map", position: [-0.55, 0, 2.15], lookAt: [1.1, 0, 3.05], waitSeconds: 4, district: "Citizen Plaza" },
     { id: "plaza-registry", position: [1.95, 0, 1.55], lookAt: [2.75, 0, 2.6], waitSeconds: 4, district: "Citizen Plaza" },
     { id: "plaza-fountain-east", position: [1.35, 0, -0.2], lookAt: [0, 0, 0], waitSeconds: 3, district: "Citizen Plaza" },
     { id: "plaza-south-social", position: [0.2, 0, -2.45], lookAt: [0, 0, 0], waitSeconds: 3, district: "Citizen Plaza" },
@@ -1447,7 +1447,7 @@ const IDLE_DURATIONS_S = [2, 5, 10] as const  // idle_short / idle_medium / idle
 
 const WANDER_POIS: AmbientWaypoint[] = [
   { id: "wp-plaza-fountain-w",  position: [-1.35, 0, -0.25], lookAt: [0, 0, 0] },
-  { id: "wp-plaza-campus-map",  position: [-0.55, 0,  2.15], lookAt: [0, 0, 3.05] },
+  { id: "wp-plaza-campus-map",  position: [-0.55, 0,  2.15], lookAt: [1.1, 0, 3.05] },
   { id: "wp-plaza-registry",    position: [ 1.95, 0,  1.55], lookAt: [2.75, 0, 2.6] },
   { id: "wp-plaza-south",       position: [ 0.20, 0, -2.45], lookAt: [0, 0, 0] },
   { id: "wp-ai-lab-path",       position: [ 0.00, 0, -4.25], lookAt: [0, 0, -8.8] },
