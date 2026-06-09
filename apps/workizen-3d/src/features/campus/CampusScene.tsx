@@ -510,7 +510,7 @@ function PlazaDetails() {
 
 function WorkizenBranding() {
   return (
-    <group position={[3.5, 0, 14.0]} rotation={[0, 0, 0]}>
+    <group position={[5.0, -0.735, 14.6]} rotation={[0, 0, 0]}>
       <mesh castShadow receiveShadow position={[0, 1.35, 0]}>
         <boxGeometry args={[4.5, 1.2, 0.16]} />
         <meshStandardMaterial color={artDirection.materials.signFace} roughness={0.42} />
