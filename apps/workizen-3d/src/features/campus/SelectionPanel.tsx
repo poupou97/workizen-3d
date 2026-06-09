@@ -9,7 +9,7 @@ export function SelectionPanel() {
   const select = useCampusStore((state) => state.select);
 
   return (
-    <aside className="glass-panel scroll-thin absolute left-4 top-[150px] z-20 max-h-[calc(100vh-15rem)] w-[min(340px,calc(100vw-2rem))] overflow-y-auto rounded-lg p-4 md:top-[136px]">
+    <aside className="glass-panel scroll-thin absolute left-4 top-[150px] z-20 max-h-[calc(100vh-15rem)] w-[min(340px,calc(100vw-2rem))] overflow-y-auto rounded-lg p-4 md:left-6 md:top-[136px]">
       {selected.kind === "vision" ? <VisionPanel /> : null}
       {selected.kind === "district" ? <DistrictPanel id={selected.id} /> : null}
       {selected.kind === "npc" ? <NpcPanel id={selected.id} /> : null}

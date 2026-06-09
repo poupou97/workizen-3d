@@ -2186,7 +2186,7 @@ export function CampusScene() {
       >
         <color attach="background" args={[artDirection.world.sky]} />
         <fog attach="fog" args={[artDirection.world.fog, artDirection.world.fogNear, artDirection.world.fogFar]} />
-        <PerspectiveCamera makeDefault position={[1.5, 26, 28]} fov={48} />
+        <PerspectiveCamera makeDefault position={[12.5, 19.6, 17.8]} fov={48} />
         <ambientLight color={artDirection.lighting.ambient.color} intensity={artDirection.lighting.ambient.intensity} />
         <directionalLight
           castShadow
@@ -2214,6 +2214,9 @@ export function CampusScene() {
           minDistance={10}
           maxDistance={40}
           maxPolarAngle={Math.PI / 2.4}
+          enableRotate={false}
+          enableZoom={false}
+          enablePan={false}
         />
       </Canvas>
     </div>
