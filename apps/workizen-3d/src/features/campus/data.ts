@@ -677,7 +677,7 @@ export const npcs: Npc[] = [
     role: "AI Systems Guide",
     purpose: "Introduces AI Citizens, agent workflows, and the AI Agent Lab landmark.",
     districtId: "ai-agent-lab",
-    position: [0, 0, -5.8],
+    position: [-5, 0, 11],
     color: "#BDF6D4",
     accentColor: "#22C55E",
     allowedActions: ["view_ai_lab", "learn_ai_citizens", "inspect_future_agents"]
@@ -689,7 +689,7 @@ export const npcs: Npc[] = [
     role: "Marketplace Guide",
     purpose: "Shows open opportunities and explains how citizens join work.",
     districtId: "opportunity-center",
-    position: [-6, 0, 0.6],
+    position: [-3, 0, 11],
     color: "#FFD3DC",
     accentColor: "#FB7185",
     allowedActions: ["view_opportunities", "inspect_team_match", "start_welcome_mission"]
@@ -701,7 +701,7 @@ export const npcs: Npc[] = [
     role: "Knowledge Guide",
     purpose: "Explains knowledge paths, playbooks, and reusable expertise.",
     districtId: "knowledge-library",
-    position: [5.7, 0, -6.5],
+    position: [-1, 0, 11],
     color: "#FFE9B8",
     accentColor: "#F59E0B",
     allowedActions: ["view_learning_paths", "inspect_playbooks", "recommend_knowledge"]
@@ -713,7 +713,7 @@ export const npcs: Npc[] = [
     role: "Compute Guide",
     purpose: "Makes compute resources visible as a future citizen type.",
     districtId: "compute-center",
-    position: [6.15, 0, -0.65],
+    position: [1, 0, 11],
     color: "#BDEEFF",
     accentColor: "#06B6D4",
     allowedActions: ["view_compute_capacity", "inspect_mock_queue", "learn_compute_citizens"]
@@ -725,7 +725,7 @@ export const npcs: Npc[] = [
     role: "Team Formation Guide",
     purpose: "Shows how a recommended team forms around an opportunity.",
     districtId: "team-office",
-    position: [0, 0, 5.35],
+    position: [3, 0, 11],
     color: "#E1D9FF",
     accentColor: "#8B5CF6",
     allowedActions: ["view_team_office", "inspect_recommended_team", "view_delivery_flow"]
@@ -737,7 +737,7 @@ export const npcs: Npc[] = [
     role: "Founder Reviewer",
     purpose: "Reviews vision, roadmap, governance, and demo readiness.",
     districtId: "founder-tower",
-    position: [-7, 0, -6.45],
+    position: [5, 0, 11],
     color: "#DCEBFF",
     accentColor: "#2563EB",
     allowedActions: ["review_demo", "approve_sprint", "request_rework"]

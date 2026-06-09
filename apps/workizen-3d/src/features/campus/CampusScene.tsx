@@ -468,23 +468,26 @@ function PlazaDetails() {
       {/* Synty fountain */}
       <SyntyModel path="/assets/models/SM_Prop_Fountain_Base_01.glb" position={[0, 0, 0]} scale={0.013} />
       <SyntyModel path="/assets/models/SM_Prop_Fountain_01.glb" position={[0, 0, 0]} scale={0.013} />
-      <DistrictSignBoard label="CITIZEN PLAZA" position={[0, 1.24, 3.35]} accent="#D59E45" wide />
+      <DistrictSignBoard label="CITIZEN PLAZA" position={[0, 2.74, 4.5]} rotation={Math.PI} accent="#D59E45" wide />
       <InfoBoard
         title="WELCOME BOARD"
         lines={["Workizen HQ", "Digital Citizen City", "Start Here"]}
-        position={[-2.75, 0, 2.6]}
+        position={[-3.5, 0, 14.0]}
+        rotation={0}
         accent="#D59E45"
       />
       <InfoBoard
         title="CAMPUS MAP"
         lines={["AI · Founder · Library", "Opportunity · Compute", "Team Office"]}
-        position={[1.1, 0, 3.05]}
+        position={[3.9, 0, -8.7]}
+        rotation={Math.atan2(-3.9, 8.7)}
         accent="#2563EB"
       />
       <InfoBoard
         title="CITIZEN REGISTRY"
         lines={["Human Citizens", "AI · Knowledge", "Compute Citizens"]}
-        position={[2.75, 0, 2.6]}
+        position={[-5.14, 0, -4.75]}
+        rotation={Math.atan2(5.14, 4.75)}
         accent="#22C55E"
       />
       {/* Lamps */}
@@ -815,6 +818,9 @@ type LandmarkBuildingConfig = {
   rotation?: [number, number, number]
   labelHeight: number
   signZ: number
+  signPosition?: [number, number, number]
+  signRotation?: number
+  hidden?: boolean
 }
 
 const LANDMARK_BUILDINGS: Record<string, LandmarkBuildingConfig> = {
@@ -824,6 +830,7 @@ const LANDMARK_BUILDINGS: Record<string, LandmarkBuildingConfig> = {
     rotation: [0, -Math.PI / 2, 0],
     labelHeight: HEIGHT.BLD_L,
     signZ: 2.75,
+    signPosition: [0, 3.72, 1.25],
   },
   "founder-tower": {
     path: "/assets/models/SM_Bld_FounderTower_01.glb",
@@ -831,6 +838,8 @@ const LANDMARK_BUILDINGS: Record<string, LandmarkBuildingConfig> = {
     rotation: [0, Math.PI * 0.88, 0],
     labelHeight: HEIGHT.TOWER,
     signZ: 2.05,
+    signPosition: [0.99, 2.22, 2.22],
+    signRotation: Math.PI * 2.38,
   },
   "knowledge-library": {
     path: "/assets/models/SM_Bld_KnowledgeLibrary_01.glb",
@@ -838,6 +847,8 @@ const LANDMARK_BUILDINGS: Record<string, LandmarkBuildingConfig> = {
     rotation: [0, Math.atan2(-8.6, -7.8), 0],
     labelHeight: HEIGHT.BLD_M,
     signZ: 2.1,
+    signPosition: [-1.33, 3.22, 1.47],
+    signRotation: Math.atan2(-7.8, 8.6),
   },
   "compute-center": {
     path: "/assets/models/SM_Bld_ComputeCenter_01.glb",
@@ -845,6 +856,8 @@ const LANDMARK_BUILDINGS: Record<string, LandmarkBuildingConfig> = {
     rotation: [0, -Math.PI / 2, 0],
     labelHeight: HEIGHT.BLD_M,
     signZ: 2.05,
+    signPosition: [-2.7, 3.22, -0.11],
+    signRotation: -Math.PI / 2,
   },
   "opportunity-center": {
     path: "/assets/models/SM_Bld_OpportunityCenter_01.glb",
@@ -852,6 +865,8 @@ const LANDMARK_BUILDINGS: Record<string, LandmarkBuildingConfig> = {
     rotation: [0, Math.PI / 2, 0],
     labelHeight: HEIGHT.BLD_M,
     signZ: 2.05,
+    signPosition: [2.0, 4.22, -0.08],
+    signRotation: Math.PI / 2,
   },
   "team-office": {
     path: "/assets/models/SM_Bld_TeamOffice_01.glb",
@@ -866,23 +881,32 @@ function LandmarkBuilding({ district, selected }: { district: District; selected
   const cfg = LANDMARK_BUILDINGS[district.id]
   if (!cfg) return null
 
+  const [bx, , bz] = district.position
+  const signPos: [number, number, number] = cfg.signPosition ?? [0, 1.22, cfg.signZ]
+  const signWorldX = bx + signPos[0]
+  const signWorldZ = bz + signPos[2]
+  const signRotation = cfg.signRotation ?? Math.atan2(-signWorldX, -signWorldZ)
+
   return (
     <group>
       <mesh receiveShadow position={[0, 0.025, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[selected ? 2.9 : 2.65, 48]} />
         <meshStandardMaterial color={selected ? artDirection.materials.warmPanel : artDirection.world.platform} roughness={0.78} />
       </mesh>
-      <TripoModel
-        path={cfg.path}
-        position={[0, 0, 0]}
-        scale={cfg.scale}
-        yOffset={cfg.yOffset ?? 0}
-        rotation={cfg.rotation}
-      />
+      {!cfg.hidden && (
+        <TripoModel
+          path={cfg.path}
+          position={[0, 0, 0]}
+          scale={cfg.scale}
+          yOffset={cfg.yOffset ?? 0}
+          rotation={cfg.rotation}
+        />
+      )}
       <DistrictSignBoard
         label={district.name.toUpperCase()}
-        position={[0, 1.22, cfg.signZ]}
+        position={signPos}
         accent={district.accentColor}
+        rotation={signRotation}
       />
       <DistrictProps district={district} />
     </group>
@@ -897,8 +921,7 @@ function DistrictProps({ district }: { district: District }) {
   if (district.id === "knowledge-library") {
     return (
       <group>
-        <SyntyModel path="/assets/models/SM_Prop_Bookshelf_01.glb" position={[-1.8, 0, d]} scale={0.01} rotation={[0, Math.PI, 0]} />
-        <SyntyModel path="/assets/models/SM_Prop_Bookshelf_02.glb" position={[1.8, 0, d]} scale={0.01} rotation={[0, Math.PI, 0]} />
+        {/* bookshelves hidden */}
       </group>
     )
   }
@@ -912,6 +935,7 @@ function DistrictProps({ district }: { district: District }) {
           title="OPPORTUNITY BOARD"
           lines={["Open Missions", "Team Matching", "Startup Work"]}
           position={[district.size[0] / 2 + 0.9, 0, 0.4]}
+          rotation={Math.atan2(-(district.position[0] + district.size[0] / 2 + 0.9), -(district.position[2] + 0.4))}
           accent={district.accentColor}
         />
       </group>
@@ -993,16 +1017,18 @@ function DistrictSignBoard({
   label,
   position,
   accent,
-  wide = false
+  wide = false,
+  rotation = 0,
 }: {
   label: string;
   position: Vector3Tuple;
   accent: string;
   wide?: boolean;
+  rotation?: number;
 }) {
   const w = wide ? 4.6 : 3.0;
   return (
-    <group position={position}>
+    <group position={position} rotation={[0, rotation, 0]}>
       <mesh castShadow>
         <boxGeometry args={[w, 0.74, 0.13]} />
         <meshStandardMaterial color={accent} roughness={0.36} />
@@ -1020,15 +1046,17 @@ function InfoBoard({
   title,
   lines,
   position,
-  accent
+  accent,
+  rotation = 0,
 }: {
   title: string;
   lines: string[];
   position: Vector3Tuple;
   accent: string;
+  rotation?: number;
 }) {
   return (
-    <group position={position}>
+    <group position={position} rotation={[0, rotation, 0]}>
       {/* Post */}
       <mesh castShadow position={[0, 0.64, 0]}>
         <cylinderGeometry args={[0.04, 0.05, 1.28, 8]} />
@@ -1334,7 +1362,7 @@ const OBSTACLE_ZONES: ObstacleZone[] = [
   { id: "team-office-building", type: "rect", position: [0, 0, 7.7], size: [3.35, 2.05] },
   // Plaza core props and boards
   { id: "plaza-fountain", type: "circle", position: [0, 0, 0], radius: 1.05 },
-  { id: "plaza-welcome-board", type: "rect", position: [-2.75, 0, 2.6], size: [1.55, 0.72] },
+  { id: "plaza-welcome-board", type: "rect", position: [-3.5, 0, 14.0], size: [1.55, 0.72] },
   { id: "plaza-campus-map-board", type: "rect", position: [1.1, 0, 3.05], size: [1.7, 0.76] },
   { id: "plaza-registry-board", type: "rect", position: [2.75, 0, 2.6], size: [1.55, 0.72] },
   // District boards / large props
