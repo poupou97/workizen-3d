@@ -510,7 +510,7 @@ function PlazaDetails() {
 
 function WorkizenBranding() {
   return (
-    <group position={[3.5, 0, 7.5]} rotation={[0, Math.PI, 0]}>
+    <group position={[3.5, 0, 9.0]} rotation={[0, 0, 0]}>
       <mesh castShadow receiveShadow position={[0, 1.35, 0]}>
         <boxGeometry args={[4.5, 1.2, 0.16]} />
         <meshStandardMaterial color={artDirection.materials.signFace} roughness={0.42} />
@@ -826,7 +826,7 @@ const LANDMARK_BUILDINGS: Record<string, LandmarkBuildingConfig> = {
   "ai-agent-lab": {
     path: "/assets/models/SM_Bld_AIAgentLab_01.glb",
     ...tripoH(HEIGHT.BLD_L),
-    rotation: [0, 0, 0],
+    rotation: [0, -Math.PI / 2, 0],
     labelHeight: HEIGHT.BLD_L,
     signZ: 2.75,
   },
@@ -840,7 +840,7 @@ const LANDMARK_BUILDINGS: Record<string, LandmarkBuildingConfig> = {
   "knowledge-library": {
     path: "/assets/models/SM_Bld_KnowledgeLibrary_01.glb",
     ...tripoH(HEIGHT.BLD_M),
-    rotation: [0, Math.atan2(-7.8, 8.6), 0],
+    rotation: [0, Math.atan2(-8.6, -7.8), 0],
     labelHeight: HEIGHT.BLD_M,
     signZ: 2.1,
   },
