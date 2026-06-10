@@ -1,0 +1,7 @@
+www.workizen.net {
+    redir https://workizen.net{uri} permanent
+}
+
+workizen.net {
+    reverse_proxy app:3000
+}
