@@ -32,3 +32,9 @@ test-results/
 
 # Temp / script output
 output/
+
+# SSH keys and secrets
+oracle-key/
+
+# Runtime logs
+logs/

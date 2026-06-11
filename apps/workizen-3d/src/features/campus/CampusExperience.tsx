@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { LoadingScreen } from "@/ui/LoadingScreen";
 import { CampusScene } from "./CampusScene";
 import { DemoGuide } from "./DemoGuide";
 import { SelectionPanel } from "./SelectionPanel";
@@ -26,6 +27,7 @@ export function CampusExperience({ initialDemoMode }: CampusExperienceProps) {
       <TopHud />
       <DemoGuide />
       <SelectionPanel />
+      <LoadingScreen />
     </main>
   );
 }

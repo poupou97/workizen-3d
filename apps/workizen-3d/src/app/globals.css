@@ -58,3 +58,102 @@ canvas {
   scrollbar-width: thin;
   scrollbar-color: rgba(47, 128, 237, 0.28) transparent;
 }
+
+/* ── Loading Screen ───────────────────────────────────────────────────────────── */
+
+.loading-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  background: linear-gradient(180deg, #e8faff 0%, #f0fff4 100%);
+  opacity: 1;
+  transition: opacity 0.65s ease;
+  user-select: none;
+  pointer-events: auto;
+}
+
+.loading-screen--fading {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-island {
+  margin-bottom: 1.5rem;
+  animation: loading-island-float 2.8s ease-in-out infinite;
+}
+
+@keyframes loading-island-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-5px); }
+}
+
+.loading-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.loading-logo__name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: #0f172a;
+}
+
+.loading-logo__tagline {
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: #496579;
+  text-transform: uppercase;
+  margin-top: 0.3rem;
+}
+
+.loading-bar-wrap {
+  width: 200px;
+}
+
+.loading-bar-track {
+  height: 3px;
+  border-radius: 9999px;
+  background: rgba(47, 128, 237, 0.12);
+  overflow: hidden;
+  margin-bottom: 0.55rem;
+}
+
+.loading-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #2f80ed 0%, #18c58f 100%);
+  background-size: 200% 100%;
+  transition: width 0.28s ease;
+  animation: loading-bar-shimmer 1.6s linear infinite;
+}
+
+@keyframes loading-bar-shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.loading-bar-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.loading-bar-meta__label {
+  font-size: 0.62rem;
+  color: #496579;
+  letter-spacing: 0.03em;
+}
+
+.loading-bar-meta__pct {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #2f80ed;
+}

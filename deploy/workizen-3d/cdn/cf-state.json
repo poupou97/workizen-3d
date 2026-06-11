@@ -1,0 +1,8 @@
+{
+  "distribution_id": "E218G9RNHGYBND",
+  "cloudfront_domain": "d27crw9brq7vyw.cloudfront.net",
+  "cert_arn": "arn:aws:acm:us-east-1:863764623569:certificate/eb0cd851-0f39-46f7-967f-006422f5311c",
+  "origin": "origin.workizen.net",
+  "oracle_vm_ip": "137.131.35.185",
+  "deployed_at": "2026-06-11"
+}
