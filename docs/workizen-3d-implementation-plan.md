@@ -421,41 +421,57 @@ These layers should not be implemented until the visual MVP and frontend data co
 
 ## Current State
 
-Completed:
+_Cập nhật lần cuối: 2026-06-11_
+
+### Completed
 
 - Governance structure exists.
-- First runnable Workizen 3D Citizen Plaza demo exists under `apps/workizen-3d-demo`.
-- Demo uses Next.js, TypeScript, React Three Fiber, Three.js, Drei, Zustand, and Tailwind CSS.
-- Demo has mock citizens, buildings, districts, and opportunities.
-- Browser smoke test validates canvas rendering and click interactions.
-- Frontend/backend split is documented.
+- `apps/workizen-3d` — production app running at workizen.net.
+- Next.js 16.2.7 standalone + Docker + Caddy 2 on Oracle VM (137.131.35.185).
+- AWS CloudFront CDN — distribution E218G9RNHGYBND, Route53 alias, ACM cert.
+- GLB cache fix — `/assets/*` 30-day immutable (was max-age=0).
+- CDN scripts: `deploy/workizen-3d/cdn/` — invalidate.sh, rollback-cloudfront.sh.
+- Loading screen with progress bar using `useProgress` from @react-three/drei.
+- Responsive UI — viewport meta, mobile bottom sheet (SelectionPanel), scrollable nav.
+- Citizen Plaza hidden from UI (button + badge removed, data intact).
+- AgentChat Overlay — Workizen Guide SVG avatar, MockProvider, Flowise-ready abstraction.
+- Service layer: `src/services/chat/` — types, MockProvider, FlowiseProvider stub, factory.
+- 85 GLB files (66MB), Synty Polygon Town assets, citizen animations (Idle/Walk/Run).
+- 2.5D camera lock, 8 districts, selection panel, demo guide, mock data.
 
-Not started:
+### In Progress
 
-- Runnable `apps/workizen-web` product shell.
-- Production `apps/workizen-3d` app.
+- `feat/responsive-ui` branch not yet merged to `main`.
+- CDN invalidation not yet integrated into deploy.sh (still manual step).
+
+### Not Started
+
+- Flowise integration (`NEXT_PUBLIC_FLOWISE_API_URL` + `NEXT_PUBLIC_FLOWISE_CHATFLOW_ID`).
+- Workizen Guide real PNG/WebP art asset (currently SVG placeholder).
+- www.workizen.net redirect (needs CloudFront Function).
+- NPC click → AgentChat context.
+- `apps/workizen-web` landing page.
 - `backend/workizen-api` Laravel backend.
-- shadcn/ui installation.
-- Framer Motion UI transitions.
-- Synty Polygon Town Pack import.
-- Ready Player Me integration.
-- Mixamo animation integration.
-- Colyseus architecture.
+- Real citizen profiles from API.
+- Reputation system.
+- Multiplayer (Colyseus).
 - Production auth.
-- Production REST API.
-- WebSocket integration.
 
-## Recommended Next Codex Command
+## Recommended Next Steps
 
-```text
-Create Workizen 3D Sprint 1.
+### Ngắn hạn (ngay bây giờ)
 
-Use apps/workizen-3d-demo as the base.
-Improve the Citizen Plaza into a richer Workizen City mock-data demo.
-Add districts for Citizen Plaza, Opportunity Board, AI Agent Lab, Knowledge Library, Compute Center, Team Office, Marketplace Street, and Citizen Homes.
-Add mock JSON data for citizens, districts, opportunities, recommended teams, reputation, skills, and availability.
-Add clickable buildings, citizen profile panel, opportunity detail panel, and recommended team panel.
-Keep frontend independent from backend.
-Do not implement blockchain, production auth, real wallet, or Laravel backend.
-Create matching work order and execution report.
-```
+1. Merge `feat/responsive-ui` → `main` và deploy.
+2. Tích hợp `./cdn/invalidate.sh` vào cuối `deploy.sh`.
+3. Tạo CloudFront Function redirect `www.workizen.net` → `workizen.net`.
+
+### Trung hạn (sprint tiếp theo)
+
+4. Deploy Flowise instance + tạo Workizen Guide chatflow + kết nối qua env vars.
+5. Commissioning Workizen Guide art asset (PNG/WebP, 6 expressions).
+6. NPC interaction → mở AgentChat với context NPC.
+
+### Tham khảo chi tiết
+
+Xem `docs/roadmaps/workizen-3d-sprint-plan-2026-06.md` — toàn bộ P0/P1/P2/P3 backlog.  
+Xem `execution-reports/2026/06/2026-06-11-workizen-3d-cdn-responsive-agentchat.md` — session report hôm nay.
