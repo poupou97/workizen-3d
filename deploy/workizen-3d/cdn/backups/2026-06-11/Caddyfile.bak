@@ -1,0 +1,13 @@
+www.workizen.net {
+    redir https://workizen.net{uri} permanent
+}
+
+workizen.net {
+    encode zstd gzip
+
+    # Strip server fingerprint headers before forwarding to client
+    header -Server
+    header -X-Powered-By
+
+    reverse_proxy app:3000
+}

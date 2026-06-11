@@ -2,6 +2,17 @@ www.workizen.net {
     redir https://workizen.net{uri} permanent
 }
 
-workizen.net {
+# origin.workizen.net is the CloudFront origin — never redirect, serve directly
+# CloudFront → origin.workizen.net → app:3000
+workizen.net, origin.workizen.net {
+    encode zstd gzip
+
+    header -Server
+    header -X-Powered-By
+
+    # Redirect www even if CloudFront forwards Host: www.workizen.net to this block
+    @www_host host www.workizen.net
+    redir @www_host https://workizen.net{uri} permanent
+
     reverse_proxy app:3000
 }
