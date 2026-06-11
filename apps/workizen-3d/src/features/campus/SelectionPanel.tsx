@@ -1,37 +1,100 @@
 "use client";
 
-import { citizens, districts, getCitizen, getDistrict, getNpc, getOpportunity, opportunities } from "./data";
+import { useEffect, useState } from "react";
+import { getCitizen, getDistrict, getNpc, getOpportunity, opportunities } from "./data";
 import { useCampusStore } from "./store";
 import type { CitizenManifest, Opportunity, RecommendedTeamMember } from "./types";
 
 export function SelectionPanel() {
   const selected = useCampusStore((state) => state.selected);
   const select = useCampusStore((state) => state.select);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  useEffect(() => {
+    setSheetOpen(selected.kind !== "vision");
+  }, [selected]);
+
+  const panelClass = [
+    "glass-panel scroll-thin overflow-y-auto p-4 transition-transform duration-300",
+    // Mobile: fixed bottom sheet
+    "fixed bottom-0 inset-x-0 z-30 max-h-[72vh] pb-20 rounded-t-2xl",
+    // Desktop overrides
+    "md:absolute md:bottom-auto md:inset-x-auto md:left-6 md:top-[136px]",
+    "md:max-h-[calc(100vh-15rem)] md:w-[min(340px,calc(100vw-3rem))]",
+    "md:rounded-lg md:pb-4 md:translate-y-0",
+    sheetOpen ? "translate-y-0" : "translate-y-full",
+  ].join(" ");
 
   return (
-    <aside className="glass-panel scroll-thin absolute left-4 top-[150px] z-20 max-h-[calc(100vh-15rem)] w-[min(340px,calc(100vw-2rem))] overflow-y-auto rounded-lg p-4 md:left-6 md:top-[136px]">
-      {selected.kind === "vision" ? <VisionPanel /> : null}
-      {selected.kind === "district" ? <DistrictPanel id={selected.id} /> : null}
-      {selected.kind === "npc" ? <NpcPanel id={selected.id} /> : null}
-      {selected.kind === "citizen" ? <CitizenPanel id={selected.id} /> : null}
-      {selected.kind === "opportunity" ? <OpportunityPanel id={selected.id} /> : null}
-      {selected.kind === "team" ? <TeamPanel id={selected.id} /> : null}
-      <div className="mt-4 border-t border-sky-100 pt-3">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Quick Open</p>
-        <div className="mt-3 grid grid-cols-1 gap-2">
-          {opportunities.map((opportunity) => (
-            <button
-              key={opportunity.id}
-              type="button"
-              className="rounded-md border border-orange-100 bg-white px-3 py-2 text-left text-xs font-bold text-slate-800 transition hover:border-orange-200 hover:bg-orange-50"
-              onClick={() => select({ kind: "opportunity", id: opportunity.id })}
-            >
-              {opportunity.name}
-            </button>
-          ))}
+    <>
+      {/* Mobile backdrop */}
+      <div
+        className={[
+          "md:hidden fixed inset-0 z-20 bg-black/10 transition-opacity duration-300",
+          sheetOpen ? "opacity-100" : "opacity-0 pointer-events-none",
+        ].join(" ")}
+        onClick={() => setSheetOpen(false)}
+      />
+
+      {/* Panel */}
+      <aside className={panelClass}>
+        {/* Mobile drag handle + close */}
+        <div className="mb-2 flex justify-center md:hidden">
+          <div className="h-1 w-10 rounded-full bg-slate-200" />
         </div>
-      </div>
-    </aside>
+        <button
+          type="button"
+          className="absolute right-3 top-3 rounded-md p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 md:hidden"
+          onClick={() => setSheetOpen(false)}
+          aria-label="Close panel"
+        >
+          <CloseIcon />
+        </button>
+
+        {selected.kind === "vision" && <VisionPanel />}
+        {selected.kind === "district" && <DistrictPanel id={selected.id} />}
+        {selected.kind === "npc" && <NpcPanel id={selected.id} />}
+        {selected.kind === "citizen" && <CitizenPanel id={selected.id} />}
+        {selected.kind === "opportunity" && <OpportunityPanel id={selected.id} />}
+        {selected.kind === "team" && <TeamPanel id={selected.id} />}
+
+        <div className="mt-4 border-t border-sky-100 pt-3">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Quick Open</p>
+          <div className="mt-3 grid grid-cols-1 gap-2">
+            {opportunities.map((opportunity) => (
+              <button
+                key={opportunity.id}
+                type="button"
+                className="rounded-md border border-orange-100 bg-white px-3 py-2 text-left text-xs font-bold text-slate-800 transition hover:border-orange-200 hover:bg-orange-50"
+                onClick={() => select({ kind: "opportunity", id: opportunity.id })}
+              >
+                {opportunity.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </aside>
+
+      {/* Mobile FAB — shown when sheet is closed */}
+      <button
+        type="button"
+        className={[
+          "md:hidden fixed bottom-16 right-4 z-20 glass-panel rounded-xl px-4 py-3 text-xs font-bold text-blue-700 transition-opacity duration-200",
+          sheetOpen ? "opacity-0 pointer-events-none" : "opacity-100",
+        ].join(" ")}
+        onClick={() => setSheetOpen(true)}
+      >
+        Explore
+      </button>
+    </>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+    </svg>
   );
 }
 

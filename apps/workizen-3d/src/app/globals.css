@@ -59,6 +59,14 @@ canvas {
   scrollbar-color: rgba(47, 128, 237, 0.28) transparent;
 }
 
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /* ── Loading Screen ───────────────────────────────────────────────────────────── */
 
 .loading-screen {
