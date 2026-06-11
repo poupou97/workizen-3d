@@ -1,14 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useCampusStore } from "@/features/campus/store";
 import { AgentChatButton } from "./AgentChatButton";
 import { AgentChatPanel } from "./AgentChatPanel";
 
 export function AgentChatOverlay() {
   const [isOpen, setIsOpen] = useState(false);
+  const selected = useCampusStore((s) => s.selected);
+  const prevSelectedRef = useRef(selected);
+
+  // Close when the user interacts with the campus (building click, nav tab, demo step)
+  useEffect(() => {
+    if (isOpen && selected !== prevSelectedRef.current) {
+      setIsOpen(false);
+    }
+    prevSelectedRef.current = selected;
+  }, [selected, isOpen]);
 
   return (
     <>
+      {/* Backdrop — catches clicks on canvas / any area outside the panel */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-[9998]"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Chat panel — slides in above the button */}
       <div
         className={[
