@@ -88,8 +88,12 @@ export function AgentChatPanel({ onClose }: Props) {
     <div className="glass-panel flex h-full flex-col overflow-hidden rounded-2xl shadow-2xl shadow-blue-200/40">
       {/* Header */}
       <div className="flex shrink-0 items-center gap-3 border-b border-sky-100 px-4 py-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600">
-          <WorkizenGuideAvatar size={32} expression="happy" />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-blue-500 to-blue-700">
+          <WorkizenGuideAvatar
+            size={38}
+            expression={isTyping ? "thinking" : "happy"}
+            animation={isTyping ? "thinking" : "idle"}
+          />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-black text-slate-900">AgentChat</p>
@@ -121,7 +125,7 @@ export function AgentChatPanel({ onClose }: Props) {
         {isTyping && (
           <div className="flex items-end gap-2">
             <div className="shrink-0">
-              <WorkizenGuideAvatar size={30} expression="thinking" />
+              <WorkizenGuideAvatar size={30} expression="thinking" animation="thinking" />
             </div>
             <div className="rounded-2xl rounded-bl-sm border border-sky-100 bg-white px-3.5 py-2.5 shadow-sm">
               <TypingIndicator />
