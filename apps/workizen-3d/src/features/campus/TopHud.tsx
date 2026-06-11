@@ -29,7 +29,7 @@ export function TopHud() {
         >
           {demoMode ? "Exit Demo" : "Demo"}
         </button>
-        {districts.map((district) => (
+        {districts.filter((d) => d.id !== "citizen-plaza").map((district) => (
           <button
             type="button"
             key={district.id}

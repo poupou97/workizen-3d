@@ -108,8 +108,7 @@ function VisionPanel() {
       </p>
       <div className="mt-3 grid gap-2 text-xs font-bold text-slate-800">
         <Badge label="World" value="HQ Island" />
-        <Badge label="Spawn" value="Citizen Plaza" />
-        <Badge label="Main Landmark" value="AI Agent Lab" />
+<Badge label="Main Landmark" value="AI Agent Lab" />
       </div>
     </section>
   );
