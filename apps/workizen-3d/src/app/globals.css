@@ -222,3 +222,44 @@ canvas {
   font-weight: 700;
   color: #2f80ed;
 }
+
+/* --- Legitimacy footer (global, low-profile over the 3D canvas) --- */
+.site-legal-footer {
+  position: fixed;
+  bottom: 6px;
+  left: 8px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(4px);
+  font-size: 10px;
+  font-weight: 600;
+  color: #475569;
+  pointer-events: auto;
+}
+.site-legal-footer nav {
+  display: flex;
+  gap: 10px;
+}
+.site-legal-footer a {
+  color: #334155;
+  text-decoration: none;
+}
+.site-legal-footer a:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+/* --- Legal / legitimacy pages --- */
+.legal-shell {
+  background: #ffffff;
+  min-height: 100vh;
+  color: #334155;
+}
+.legal-prose h2 {
+  margin-top: 0.5rem;
+}

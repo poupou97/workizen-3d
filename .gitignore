@@ -38,3 +38,9 @@ oracle-key/
 
 # Runtime logs
 logs/
+*.apk
+*.aab
+*.exe
+*.ipa
+*.dmg
+*.msi
