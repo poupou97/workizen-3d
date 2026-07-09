@@ -9,13 +9,32 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalLayout title="Privacy Policy" updated="June 18, 2026">
+    <LegalLayout title="Privacy Policy" updated="July 9, 2026">
       <p>
         This Privacy Policy explains how Workizen (&ldquo;Workizen,&rdquo; &ldquo;we,&rdquo;
         &ldquo;us&rdquo;) handles information in connection with the workizen.net website and
         related preview products (the &ldquo;Services&rdquo;). This is an initial policy for a
         product in active development and will be updated as features mature.
       </p>
+
+      <h2 className="pt-3 text-xl font-bold text-slate-900">
+        AI features and third-party AI providers (Workizen Hub app)
+      </h2>
+      <p>
+        The Workizen Hub mobile app is <strong>BYOK (bring your own key)</strong> and has{" "}
+        <strong>no Workizen server of its own</strong>. When you use an AI feature, the content
+        you choose to process — your message, text extracted from a document, or an image you
+        select — is sent <strong>directly from your device</strong> to the third-party AI
+        provider you have connected (for example Google Gemini, OpenAI, Anthropic, OpenRouter,
+        Cerebras, or a local/LAN model), authenticated with <strong>your own API key</strong>.
+        Workizen does not receive, store, or proxy this content.
+      </p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li><strong>What is sent</strong> — only the specific content you choose to process for that request (a message, document text, or a selected image).</li>
+        <li><strong>Who it is sent to</strong> — the AI provider you selected and configured with your own key. Each provider processes your content under <strong>its own privacy policy and terms</strong>; please review the policy of the provider(s) you use.</li>
+        <li><strong>Your permission</strong> — the app asks for your explicit consent before any content is sent to a provider. You can decline and continue using the app fully offline (scanning, on-device OCR, and PDF export never leave your device).</li>
+        <li><strong>Your API key</strong> — stored only in your device&rsquo;s secure storage; it leaves the device only inside the authorization header of a direct request to your chosen provider, never to Workizen.</li>
+      </ul>
 
       <h2 className="pt-3 text-xl font-bold text-slate-900">Information we collect</h2>
       <ul className="list-disc space-y-2 pl-6">
