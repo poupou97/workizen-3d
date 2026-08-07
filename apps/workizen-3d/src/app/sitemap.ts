@@ -8,6 +8,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/`, lastModified: now, changeFrequency: "weekly", priority: 1 },
     { url: `${BASE}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.5 },
+    // Tổng Tài app policy — Play Console points at this URL, so it must be crawlable.
+    { url: `${BASE}/privacy/tongtai`, lastModified: now, changeFrequency: "yearly", priority: 0.5 },
     { url: `${BASE}/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.5 },
     { url: `${BASE}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
   ];
