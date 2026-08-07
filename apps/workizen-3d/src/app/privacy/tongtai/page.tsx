@@ -154,12 +154,67 @@ export default function TongtaiPrivacyPage() {
         <strong>không bao giờ</strong> bị xoá bởi thao tác này.
       </p>
 
-      <h2 className="pt-3 text-xl font-bold text-slate-900">8. Quyền của bạn</h2>
+      <h2 id="xoa-du-lieu" className="pt-3 text-xl font-bold text-slate-900">
+        8. Quyền của bạn &amp; cách xoá dữ liệu
+      </h2>
+      <p className="rounded-lg border-l-4 border-blue-600 bg-blue-50 p-4">
+        <strong>Yêu cầu xoá dữ liệu — Tổng Tài (com.workizen.tongtai).</strong>{" "}
+        Vì dữ liệu kinh doanh nằm trên máy bạn và app không có tài khoản, bạn tự
+        xoá được ngay, không cần chờ ai duyệt.
+      </p>
+      <h3 className="pt-2 text-base font-bold text-slate-900">
+        Cách 1 — Xoá toàn bộ dữ liệu kinh doanh (tức thì)
+      </h3>
+      <ol className="list-decimal space-y-2 pl-6">
+        <li>Gỡ cài đặt ứng dụng Tổng Tài khỏi điện thoại.</li>
+        <li>
+          Toàn bộ khách hàng, sản phẩm, đơn hàng, mục tiêu và giao dịch bị xoá
+          cùng lúc — chúng chỉ tồn tại trong bộ nhớ ứng dụng, không có bản sao
+          trên máy chủ nào.
+        </li>
+      </ol>
+      <h3 className="pt-2 text-base font-bold text-slate-900">
+        Cách 2 — Xoá dữ liệu chẩn đoán và báo cáo sự cố
+      </h3>
+      <ol className="list-decimal space-y-2 pl-6">
+        <li>
+          Gửi email tới{" "}
+          <a
+            href="mailto:privacy@workizen.net?subject=Yeu%20cau%20xoa%20du%20lieu%20-%20Tong%20Tai"
+            className="font-semibold text-blue-700 underline"
+          >
+            privacy@workizen.net
+          </a>{" "}
+          với tiêu đề &ldquo;Yêu cầu xoá dữ liệu — Tổng Tài&rdquo;.
+        </li>
+        <li>Chúng tôi xử lý trong vòng 30 ngày và trả lời bằng email.</li>
+      </ol>
+      <h3 className="pt-2 text-base font-bold text-slate-900">
+        Loại dữ liệu nào bị xoá, loại nào được giữ
+      </h3>
+      <ul className="list-disc space-y-2 pl-6">
+        <li>
+          <strong>Xoá ngay khi gỡ app:</strong> toàn bộ dữ liệu kinh doanh, khoá
+          API, lịch sử trò chuyện, cài đặt. Không có bản sao ở nơi khác.
+        </li>
+        <li>
+          <strong>Báo cáo sự cố (Crashlytics):</strong> Google tự động xoá sau{" "}
+          <strong>90 ngày</strong>.
+        </li>
+        <li>
+          <strong>Sự kiện chẩn đoán</strong> (<code>app_open</code>,{" "}
+          <code>screen_error</code>): ẩn danh, <strong>không gắn</strong> với
+          danh tính hay thiết bị nào của bạn, nên không thể truy ngược về một
+          người dùng cụ thể.
+        </li>
+        <li>
+          <strong>Không có gì được giữ lại</strong> sau khi bạn gỡ app — chúng
+          tôi không có tài khoản, hồ sơ hay bản sao dữ liệu kinh doanh của bạn.
+        </li>
+      </ul>
       <p>
-        Vì dữ liệu nằm trên máy bạn và chúng tôi không có tài khoản nào của bạn,
-        bạn <strong>đã</strong> nắm quyền kiểm soát: gỡ app là xoá toàn bộ dữ
-        liệu, xuất <code>.ttbk</code> là mang dữ liệu đi. Với số liệu vận hành ở
-        mục 3, liên hệ địa chỉ bên dưới.
+        Muốn giữ dữ liệu trước khi xoá: dùng <strong>Xuất sao lưu</strong> trong
+        app để tạo file <code>.ttbk</code> mang sang máy khác.
       </p>
 
       <h2 className="pt-3 text-xl font-bold text-slate-900">9. Trẻ em</h2>
