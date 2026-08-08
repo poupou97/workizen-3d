@@ -1,0 +1,21 @@
+# app-ads.txt — xác minh kho quảng cáo của Workizen (IAB Tech Lab spec 1.0)
+#
+# Google đối chiếu file này với ô "Website" khai trong Play Console
+# (Grow users › Store presence › Store settings › Store listing contact
+# details). Ô đó đang là https://workizen.net — nên file PHẢI nằm ở gốc
+# tên miền này, không phải subdomain.
+#
+# Publisher ID lấy từ chính ID AdMob app đang dùng:
+#   mobile/app/lib/features/ads/ad_config.dart
+#   ca-app-pub-6786709520035168~5694740419  (Android)
+#   ca-app-pub-6786709520035168~9219886600  (iOS)
+#
+# ⚠️ File này PHẢI nằm trong repo, không được đặt tay lên máy chủ:
+# deploy/workizen-3d/deploy.sh chạy `rsync --delete`, tức XOÁ MỌI FILE LẠ
+# trong /srv/workizen-3d/ ở mỗi lần deploy. Cùng cơ chế đã xoá cấu hình Caddy
+# và làm mất đăng nhập nhiều ngày (xem PR #3).
+#
+# Google crawl vài ngày một lần. Xem trạng thái xác minh tại:
+#   apps.admob.com › Apps › View all apps › thẻ app-ads.txt
+
+google.com, pub-6786709520035168, DIRECT, f08c47fec0942fa0
