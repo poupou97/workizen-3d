@@ -17,12 +17,12 @@ export function DemoGuide() {
   const step = demoSteps[demoStepIndex];
 
   return (
-    <section className="glass-panel absolute bottom-4 left-4 z-20 w-[min(560px,calc(100vw-2rem))] rounded-lg p-4">
+    <section className="glass-panel absolute bottom-20 inset-x-4 z-20 rounded-lg p-4 md:bottom-4 md:left-4 md:right-auto md:w-[min(560px,calc(100vw-2rem))]">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-700">Founder Demo Mode</p>
-          <h2 className="mt-1 text-xl font-black text-slate-950">{step.title}</h2>
-          <p className="mt-1 text-sm font-semibold text-slate-700">{step.summary}</p>
+          <h2 className="mt-1 text-lg font-black text-slate-950 md:text-xl">{step.title}</h2>
+          <p className="mt-1 text-xs font-semibold text-slate-700 md:text-sm">{step.summary}</p>
         </div>
         <p className="shrink-0 rounded-md bg-blue-600 px-2 py-1 text-xs font-bold text-white shadow-sm shadow-blue-200">
           {demoStepIndex + 1}/{demoSteps.length}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { AgentChatOverlay } from "@/components/chat/AgentChatOverlay";
 import { LoadingScreen } from "@/ui/LoadingScreen";
 import { CampusScene } from "./CampusScene";
 import { DemoGuide } from "./DemoGuide";
@@ -27,6 +28,7 @@ export function CampusExperience({ initialDemoMode }: CampusExperienceProps) {
       <TopHud />
       <DemoGuide />
       <SelectionPanel />
+      <AgentChatOverlay />
       <LoadingScreen />
     </main>
   );
