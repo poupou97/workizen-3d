@@ -16,3 +16,70 @@ workizen.net, origin.workizen.net {
 
     reverse_proxy app:3000
 }
+
+# --- Phase Identity: Keycloak ---
+# PUBLIC auth endpoint (founder decision). Not indexed. No basic_auth (would break OIDC).
+identity.workizen.net {
+    header X-Robots-Tag "noindex, nofollow, noarchive"
+    handle /robots.txt {
+        respond "User-agent: *
+Disallow: /
+" 200
+    }
+    handle {
+        reverse_proxy observer-keycloak:8080 {
+            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Host {host}
+            header_up X-Real-IP {remote_host}
+        }
+    }
+}
+
+# --- Grafana --- HOTFIX-SECURITY-002B: noindex + basic_auth (temporary; migrate to IP allowlist/SSO later).
+# basic_auth gates the public edge; Keycloak SSO still completes inside (browser carries creds on callback).
+grafana.workizen.net {
+    header X-Robots-Tag "noindex, nofollow, noarchive"
+    handle /robots.txt {
+        respond "User-agent: *
+Disallow: /
+" 200
+    }
+    handle {
+        basic_auth {
+            ops $2a$14$P7VjhSpV.kEgFZhwKGprMeUC.F3FSzk2S7dSaR/voC6IR0SJuBD36
+        }
+        reverse_proxy observer-grafana:3000 {
+            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Host {host}
+            header_up X-Real-IP {remote_host}
+        }
+    }
+}
+
+# --- Langfuse --- HOTFIX-SECURITY-002B: noindex + basic_auth (temporary).
+langfuse.workizen.net {
+    header X-Robots-Tag "noindex, nofollow, noarchive"
+    handle /robots.txt {
+        respond "User-agent: *
+Disallow: /
+" 200
+    }
+    handle {
+        basic_auth {
+            ops $2a$14$P7VjhSpV.kEgFZhwKGprMeUC.F3FSzk2S7dSaR/voC6IR0SJuBD36
+        }
+        reverse_proxy observer-langfuse-web:3000
+    }
+}
+
+# --- Portal (Laravel) --- khôi phục 2026-08-07 sau khi mất trong đợt gộp hạ tầng
+portal.workizen.net {
+    encode zstd gzip
+    header -Server
+    header -X-Powered-By
+    reverse_proxy portal-web:80 {
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-Host {host}
+        header_up X-Real-IP {remote_host}
+    }
+}

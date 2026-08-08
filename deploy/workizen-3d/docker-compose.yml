@@ -20,6 +20,17 @@ services:
       - caddy_config:/config
     depends_on:
       - app
+    # Portal + Keycloak sống ở mạng `observer-proxy` (dự án observer-layer).
+    # THIẾU dòng này thì mỗi lần `up -d` dựng lại container là Caddy mất đường
+    # tới chúng — portal.workizen.net chết TLS và identity.workizen.net trả
+    # 502. Đã xảy ra thật ngày 2026-08-07, im lặng nhiều ngày.
+    networks:
+      - default
+      - observer-proxy
+
+networks:
+  observer-proxy:
+    external: true
 
 volumes:
   caddy_data:
