@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+*.md
+Dockerfile
+docker-compose.yml
+Caddyfile
+.dockerignore
+deploy.sh

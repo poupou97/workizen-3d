@@ -1,0 +1,19 @@
+import type { NextConfig } from "next";
+
+const IMMUTABLE = "public, max-age=2592000, immutable"; // 30 days
+
+const nextConfig: NextConfig = {
+  reactStrictMode: true,
+  output: "standalone",
+  async headers() {
+    return [
+      // 3D models, textures, and rigged character assets — content never changes at a given path
+      {
+        source: "/assets/:path*",
+        headers: [{ key: "Cache-Control", value: IMMUTABLE }],
+      },
+    ];
+  },
+};
+
+export default nextConfig;

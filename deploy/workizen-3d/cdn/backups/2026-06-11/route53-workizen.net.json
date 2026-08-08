@@ -1,0 +1,123 @@
+{
+    "ResourceRecordSets": [
+        {
+            "Name": "workizen.net.",
+            "Type": "A",
+            "TTL": 60,
+            "ResourceRecords": [
+                {
+                    "Value": "137.131.35.185"
+                }
+            ]
+        },
+        {
+            "Name": "workizen.net.",
+            "Type": "NS",
+            "TTL": 172800,
+            "ResourceRecords": [
+                {
+                    "Value": "ns-1071.awsdns-05.org."
+                },
+                {
+                    "Value": "ns-1814.awsdns-34.co.uk."
+                },
+                {
+                    "Value": "ns-556.awsdns-05.net."
+                },
+                {
+                    "Value": "ns-232.awsdns-29.com."
+                }
+            ]
+        },
+        {
+            "Name": "workizen.net.",
+            "Type": "SOA",
+            "TTL": 900,
+            "ResourceRecords": [
+                {
+                    "Value": "ns-1071.awsdns-05.org. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400"
+                }
+            ]
+        },
+        {
+            "Name": "db.workizen.net.",
+            "Type": "A",
+            "TTL": 300,
+            "ResourceRecords": [
+                {
+                    "Value": "129.153.114.109"
+                }
+            ]
+        },
+        {
+            "Name": "neo4j.db.workizen.net.",
+            "Type": "A",
+            "TTL": 300,
+            "ResourceRecords": [
+                {
+                    "Value": "129.153.114.109"
+                }
+            ]
+        },
+        {
+            "Name": "portainer.db.workizen.net.",
+            "Type": "A",
+            "TTL": 300,
+            "ResourceRecords": [
+                {
+                    "Value": "129.153.114.109"
+                }
+            ]
+        },
+        {
+            "Name": "qdrant.db.workizen.net.",
+            "Type": "A",
+            "TTL": 300,
+            "ResourceRecords": [
+                {
+                    "Value": "129.153.114.109"
+                }
+            ]
+        },
+        {
+            "Name": "supabase.db.workizen.net.",
+            "Type": "A",
+            "TTL": 300,
+            "ResourceRecords": [
+                {
+                    "Value": "129.153.114.109"
+                }
+            ]
+        },
+        {
+            "Name": "knowledge.workizen.net.",
+            "Type": "A",
+            "TTL": 300,
+            "ResourceRecords": [
+                {
+                    "Value": "129.153.114.109"
+                }
+            ]
+        },
+        {
+            "Name": "portainer3.workizen.net.",
+            "Type": "A",
+            "TTL": 300,
+            "ResourceRecords": [
+                {
+                    "Value": "137.131.35.185"
+                }
+            ]
+        },
+        {
+            "Name": "www.workizen.net.",
+            "Type": "A",
+            "TTL": 60,
+            "ResourceRecords": [
+                {
+                    "Value": "137.131.35.185"
+                }
+            ]
+        }
+    ]
+}

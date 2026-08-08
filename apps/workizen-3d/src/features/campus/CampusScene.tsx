@@ -1,7 +1,7 @@
 "use client";
 
 import { Float, OrbitControls, PerspectiveCamera, Text, useAnimations, useGLTF, useTexture } from "@react-three/drei";
-import { Canvas, ThreeEvent } from "@react-three/fiber";
+import { Canvas, ThreeEvent, useFrame } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { clone as cloneSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js";
@@ -52,7 +52,7 @@ const SYNTY_PALETTE = "/assets/textures/PolygonTown_Texture_01_A.png"
 //   SM_Env_Tree_01          scale=0.010 → 4.69m
 //   SM_Env_Tree_Pine_01     scale=0.010 → 5.48m
 //   SM_Env_Tree_Large_01    scale=0.004 → 4.65m
-//   SM_Prop_Fountain_01     scale=0.012 → 1.82m
+//   SM_Prop_Fountain_01     scale=0.013 → ~1.97m
 //   SM_Prop_Bookshelf_01    scale=0.010 → 2.19m
 //   SM_Prop_Desk_01         scale=0.012 → 1.05m
 // ─────────────────────────────────────────────────────────────────────────────
@@ -70,13 +70,13 @@ const HEIGHT = {
   // Vegetation (Tripo)
   BAMBOO:  2.50,  // bamboo cluster
   CHERRY:  3.50,  // cherry blossom
-  PALM:    4.50,  // palm tree
+  PALM:    3.80,  // palm tree — cozy (was 4.50)
 
-  // Buildings (Tripo)
-  TOWER:   4.50,  // founder tower — district landmark
-  BLD_L:   4.20,  // AI Agent Lab — main north landmark
-  BLD_M:   3.50,  // knowledge library / compute center / opportunity center
-  BLD_S:   3.50,  // team office (rawH=0.766 → use tripoH with rawH arg)
+  // Buildings (Tripo) — cozy Animal Crossing scale
+  TOWER:   7.50,  // founder tower — island landmark (was 4.50)
+  BLD_L:   5.00,  // AI Agent Lab — main north landmark (was 4.20)
+  BLD_M:   4.50,  // knowledge library / compute center / opportunity center (was 3.50)
+  BLD_S:   4.00,  // team office (rawH=0.766 → use tripoH with rawH arg) (was 3.50)
 
   // Props (Tripo)
   PIER:    1.50,  // dock pier (rawH=0.377 → use tripoH with rawH arg)
@@ -152,6 +152,12 @@ SYNTY_TREE_PATHS.forEach(p => useGLTF.preload(p))
   "/assets/animations/Talking.glb",
   "/assets/animations/Pointing.glb",
 ].forEach(p => useGLTF.preload(p))
+
+// Tripo-native animated wanderer assets (Layla Chen + Workizen Guide)
+const ANIM_IDLE_PATH = "/assets/rigged/layla-chen/animations/Idle.glb" as const
+const ANIM_WALK_PATH = "/assets/rigged/layla-chen/animations/Walk.glb" as const
+useGLTF.preload(ANIM_IDLE_PATH)
+useGLTF.preload(ANIM_WALK_PATH)
 
 function SyntyModel({
   path,
@@ -310,42 +316,6 @@ function createOrganicIslandShape(radiusX: number, radiusZ: number, wobble = 0.0
   return shape
 }
 
-// AnimatedModel: rigged GLB (_Rigged.glb từ auto-rig-characters.mjs) + Mixamo animation clip
-function AnimatedModel({
-  modelPath,
-  animPath,
-  clipName,
-  position,
-  scale = 1.0,
-  rotation,
-}: {
-  modelPath: string
-  animPath: string
-  clipName?: string
-  position: Vector3Tuple
-  scale?: number
-  rotation?: [number, number, number]
-}) {
-  const group = useRef<THREE.Group>(null!)
-  const { scene } = useGLTF(modelPath)
-  const { animations } = useGLTF(animPath)
-  const cloned = useMemo(() => cloneSkeleton(scene), [scene])
-  const { actions } = useAnimations(animations, group)
-
-  useEffect(() => {
-    const name = clipName ?? Object.keys(actions)[0]
-    if (name && actions[name]) actions[name].reset().fadeIn(0.3).play()
-    return () => { Object.values(actions).forEach(a => a?.stop()) }
-  }, [actions, clipName])
-
-  const [x, y, z] = position
-  return (
-    <group ref={group} position={[x, y, z]} scale={scale} rotation={rotation ?? [0, 0, 0]}>
-      <primitive object={cloned} />
-    </group>
-  )
-}
-
 // ── Ground & Paths ────────────────────────────────────────────────────────────
 
 function CampusGround() {
@@ -496,45 +466,35 @@ function PlazaDetails() {
   return (
     <group>
       {/* Synty fountain */}
-      <SyntyModel path="/assets/models/SM_Prop_Fountain_Base_01.glb" position={[0, 0, 0]} scale={0.012} />
-      <SyntyModel path="/assets/models/SM_Prop_Fountain_01.glb" position={[0, 0, 0]} scale={0.012} />
-      <DistrictSignBoard label="CITIZEN PLAZA" position={[0, 1.24, 3.35]} accent="#D59E45" wide />
+      <SyntyModel path="/assets/models/SM_Prop_Fountain_Base_01.glb" position={[0, 0, 0]} scale={0.013} />
+      <SyntyModel path="/assets/models/SM_Prop_Fountain_01.glb" position={[0, 0, 0]} scale={0.013} />
+      <DistrictSignBoard label="CITIZEN PLAZA" position={[0, 2.74, 4.5]} rotation={Math.PI} accent="#D59E45" wide />
       <InfoBoard
         title="WELCOME BOARD"
         lines={["Workizen HQ", "Digital Citizen City", "Start Here"]}
-        position={[-2.75, 0, 2.6]}
+        position={[-3.5, 0, 14.0]}
+        rotation={0}
         accent="#D59E45"
       />
       <InfoBoard
         title="CAMPUS MAP"
         lines={["AI · Founder · Library", "Opportunity · Compute", "Team Office"]}
-        position={[0, 0, 3.05]}
+        position={[3.9, 0, -8.7]}
+        rotation={Math.atan2(-3.9, 8.7)}
         accent="#2563EB"
       />
       <InfoBoard
         title="CITIZEN REGISTRY"
         lines={["Human Citizens", "AI · Knowledge", "Compute Citizens"]}
-        position={[2.75, 0, 2.6]}
+        position={[-5.14, 0, -4.75]}
+        rotation={Math.atan2(5.14, 4.75)}
         accent="#22C55E"
       />
-      {/* Benches */}
-      {(
-        [
-          [-2.2, 0, -1.4, Math.PI / 2],
-          [2.2, 0, -1.4, -Math.PI / 2],
-          [-2.2, 0, 1.35, Math.PI / 2],
-          [2.2, 0, 1.35, -Math.PI / 2]
-        ] as [number, number, number, number][]
-      ).map(([x, y, z, rotation], index) => (
-        <Bench key={index} position={[x, y, z]} rotation={rotation} />
-      ))}
       {/* Lamps */}
       {(
         [
-          [-2.85, 0, -2.4],
-          [2.85, 0, -2.4],
-          [-2.85, 0, 2.4],
-          [2.85, 0, 2.4]
+          [-2.55, 0, -2.25],
+          [2.55, 0, -2.25]
         ] as Vector3Tuple[]
       ).map((position, index) => (
         <Lamp key={index} position={position} />
@@ -545,7 +505,7 @@ function PlazaDetails() {
 
 function WorkizenBranding() {
   return (
-    <group position={[0, 0, -2.8]}>
+    <group position={[5.0, -0.735, 14.6]} rotation={[0, 0, 0]}>
       <mesh castShadow receiveShadow position={[0, 1.35, 0]}>
         <boxGeometry args={[4.5, 1.2, 0.16]} />
         <meshStandardMaterial color={artDirection.materials.signFace} roughness={0.42} />
@@ -617,50 +577,50 @@ type TreePlacement = {
 
 function CampusDecor() {
   const PLAZA_SMALL_TREES: TreePlacement[] = [
-    { position: [-2.8, 0, 2.25], variant: 0, scale: 0.006, yOffset: -0.03 },
-    { position: [2.8, 0, 2.25], variant: 1, scale: 0.006, yOffset: -0.03 },
+    { position: [-2.8, 0, 2.25], variant: 0, scale: 0.0058, yOffset: -0.03 },
+    { position: [2.8, 0, 2.25], variant: 1, scale: 0.0058, yOffset: -0.03 },
     { position: [-2.95, 0, -2.2], variant: 2, scale: 0.0058, yOffset: -0.03 },
     { position: [2.95, 0, -2.2], variant: 3, scale: 0.0058, yOffset: -0.03 },
     { position: [0, 0, 3.65], variant: 0, scale: 0.0055, yOffset: -0.04 },
   ];
 
   const BETWEEN_BUILDING_TREES: TreePlacement[] = [
-    { position: [-5.8, 0, -5.3], variant: 2, scale: 0.008 },
-    { position: [5.8, 0, -5.4], variant: 1, scale: 0.008 },
-    { position: [-10.6, 0, -5.6], variant: 0, scale: 0.0085 },
-    { position: [10.6, 0, -5.6], variant: 2, scale: 0.0085 },
-    { position: [-5.9, 0, 3.5], variant: 1, scale: 0.008 },
-    { position: [5.9, 0, 3.5], variant: 0, scale: 0.008 },
-    { position: [-8.9, 0, -10.1], variant: 2, scale: 0.008 },
-    { position: [8.9, 0, -10.1], variant: 1, scale: 0.008 },
-    { position: [3.6, 0, 8.9], variant: 3, scale: 0.008 },
+    { position: [-5.8, 0, -5.3], variant: 2, scale: 0.0072 },
+    { position: [5.8, 0, -5.4], variant: 1, scale: 0.0072 },
+    { position: [-10.6, 0, -5.6], variant: 0, scale: 0.0072 },
+    { position: [10.6, 0, -5.6], variant: 2, scale: 0.0072 },
+    { position: [-5.9, 0, 3.5], variant: 1, scale: 0.0072 },
+    { position: [5.9, 0, 3.5], variant: 0, scale: 0.0072 },
+    { position: [-8.9, 0, -10.1], variant: 2, scale: 0.0072 },
+    { position: [8.9, 0, -10.1], variant: 1, scale: 0.0072 },
+    { position: [3.6, 0, 8.9], variant: 3, scale: 0.0072 },
   ];
 
   const BENCH_SHADE_TREES: TreePlacement[] = [
-    { position: [-9.8, 0, 3.8], variant: 0, scale: 0.0085 },
-    { position: [9.8, 0, 3.8], variant: 1, scale: 0.0085 },
-    { position: [-6.1, 0, -10.9], variant: 2, scale: 0.0085 },
-    { position: [6.1, 0, -10.9], variant: 0, scale: 0.0085 },
-    { position: [-3.2, 0, 9.6], variant: 1, scale: 0.008 },
+    { position: [-9.8, 0, 3.8], variant: 0, scale: 0.0075 },
+    { position: [9.8, 0, 3.8], variant: 1, scale: 0.0075 },
+    { position: [-6.1, 0, -10.9], variant: 2, scale: 0.0075 },
+    { position: [6.1, 0, -10.9], variant: 0, scale: 0.0075 },
+    { position: [-3.2, 0, 9.6], variant: 1, scale: 0.0072 },
   ];
 
   const COASTLINE_TREES: TreePlacement[] = [
-    { position: [-14.1, 0, 0.7], variant: 1, scale: 0.009 },
-    { position: [-13.5, 0, -5.5], variant: 2, scale: 0.009 },
-    { position: [-11.8, 0, -10.2], variant: 0, scale: 0.009 },
-    { position: [-5.0, 0, -13.9], variant: 2, scale: 0.009 },
-    { position: [0.6, 0, -14.2], variant: 0, scale: 0.009 },
-    { position: [5.8, 0, -13.5], variant: 1, scale: 0.009 },
-    { position: [11.9, 0, -9.4], variant: 0, scale: 0.009 },
-    { position: [14.0, 0, -4.2], variant: 1, scale: 0.009 },
-    { position: [13.9, 0, 2.6], variant: 2, scale: 0.009 },
-    { position: [12.0, 0, 8.4], variant: 1, scale: 0.009 },
-    { position: [7.3, 0, 12.1], variant: 2, scale: 0.009 },
-    { position: [1.9, 0, 13.2], variant: 0, scale: 0.0088 },
-    { position: [-4.1, 0, 13.1], variant: 1, scale: 0.0088 },
-    { position: [-9.4, 0, 11.1], variant: 2, scale: 0.009 },
-    { position: [-12.9, 0, 6.1], variant: 0, scale: 0.009 },
-    { position: [14.0, 0, -0.7], variant: 3, path: "/assets/models/SM_Env_Tree_Pine_01.glb", scale: 0.008, yOffset: 0.12 },
+    { position: [-14.1, 0, 0.7], variant: 1, scale: 0.0082 },
+    { position: [-13.5, 0, -5.5], variant: 2, scale: 0.0082 },
+    { position: [-11.8, 0, -10.2], variant: 0, scale: 0.0082 },
+    { position: [-5.0, 0, -13.9], variant: 2, scale: 0.0082 },
+    { position: [0.6, 0, -14.2], variant: 0, scale: 0.0082 },
+    { position: [5.8, 0, -13.5], variant: 1, scale: 0.0082 },
+    { position: [11.9, 0, -9.4], variant: 0, scale: 0.0082 },
+    { position: [14.0, 0, -4.2], variant: 1, scale: 0.0082 },
+    { position: [13.9, 0, 2.6], variant: 2, scale: 0.0082 },
+    { position: [12.0, 0, 8.4], variant: 1, scale: 0.0082 },
+    { position: [7.3, 0, 12.1], variant: 2, scale: 0.0082 },
+    { position: [1.9, 0, 13.2], variant: 0, scale: 0.0082 },
+    { position: [-4.1, 0, 13.1], variant: 1, scale: 0.0082 },
+    { position: [-9.4, 0, 11.1], variant: 2, scale: 0.0082 },
+    { position: [-12.9, 0, 6.1], variant: 0, scale: 0.0082 },
+    { position: [14.0, 0, -0.7], variant: 3, path: "/assets/models/SM_Env_Tree_Pine_01.glb", scale: 0.0067, yOffset: 0.12 },
   ];
 
   const treeGroups = [
@@ -671,46 +631,40 @@ function CampusDecor() {
   ];
 
   const lamps: Vector3Tuple[] = [
-    // Major paths outside the central plaza ring
-    [-0.85, 0, -4.9], [0.85, 0, -4.9],
-    [-5.1, 0, 0], [-6.9, 0, 0],
-    [5.1, 0, 0], [6.9, 0, 0],
-    [0, 0, 5.1],
-    [-4.85, 0, -4.85],
-    [4.85, 0, -4.85]
+    // Inner ring (r≈4) — plaza perimeter, flanking the info boards
+    [-2.1, 0, 3.3], [2.1, 0, 3.3],
+    // Middle ring — rotated 15° clockwise around center
+    [1.6, 0, -6.0],        // AI Agent Lab
+    [-5.7, 0, -9.1],       // Founder Tower
+    [8.2, 0, -4.3],        // Knowledge Library
+    [-5.9, 0, -1.2],       // Opportunity Center
+    [5.7, 0, 1.9],         // Compute Center
+  ];
+
+  const outerLamps: Vector3Tuple[] = [
+    // Outer ring — đằng sau Founder/Knowledge Library, gần bãi cát, hướng ra ngoài
+    [-8.7, 0, -11.7],      // behind Founder Tower
+    [7.8, 0, -10.5],       // behind Knowledge Library
   ];
 
   const benches: { position: Vector3Tuple; rotation: number }[] = [
-    // AI Agent Lab surroundings
-    { position: [-1.9, 0, -5.5], rotation: 0 },
-    { position: [1.9, 0, -5.5], rotation: 0 },
-    { position: [-3.3, 0, -6.9], rotation: Math.PI / 4 },
-    // Founder Tower surroundings
-    { position: [-8.6, 0, -6.9], rotation: Math.PI / 2 },
-    { position: [-7.2, 0, -10.6], rotation: 0 },
-    { position: [-5.6, 0, -9.6], rotation: Math.PI / 6 },
-    // Knowledge Library surroundings
-    { position: [8.6, 0, -6.9], rotation: -Math.PI / 2 },
-    { position: [7.2, 0, -10.6], rotation: 0 },
-    { position: [5.6, 0, -9.6], rotation: -Math.PI / 6 },
-    // Opportunity Center surroundings
-    { position: [-9.6, 0, 2.9], rotation: Math.PI / 2 },
-    { position: [-7.6, 0, 3.3], rotation: 0 },
-    { position: [-6.6, 0, 2.6], rotation: Math.PI / 2 },
-    // Compute Center surroundings
-    { position: [9.6, 0, 2.9], rotation: -Math.PI / 2 },
-    { position: [7.6, 0, 3.3], rotation: 0 },
-    { position: [6.6, 0, 2.6], rotation: -Math.PI / 2 },
-    // Team Office surroundings
-    { position: [2.3, 0, 5.1], rotation: -Math.PI / 2 },
-    { position: [-2.3, 0, 5.1], rotation: Math.PI / 2 },
-    { position: [0, 0, 9.6], rotation: 0 }
+    // Founder Tower: 1 bench, 4m from south wall, face island center [0,0,0]
+    { position: [-8.6, 0, -3.375], rotation: Math.atan2(8.6, 3.375) },
+    // Knowledge Library: 1 bench, 4m from south wall, face island center [0,0,0]
+    { position: [8.6, 0, -3.375], rotation: Math.atan2(-8.6, 3.375) },
+    // Opportunity Center: 10m from building, face building (away from pier)
+    { position: [-8.7, 0, 10], rotation: Math.atan2(8.7, 12.8) + Math.PI },
+    // Compute Center: 10m from building, face building (away from pier)
+    { position: [8.7, 0, 10], rotation: Math.atan2(-8.7, 12.8) + Math.PI },
+    // Team Office: 2 benches flanking entrance, 6.6m apart, facing outward
+    { position: [3.3, 0, 6.675], rotation: Math.PI / 2 },
+    { position: [-3.3, 0, 6.675], rotation: -Math.PI / 2 },
   ];
 
   const flowers: { position: Vector3Tuple; color: string }[] = [
     // ── Original 8 flower patches (kept, re-colored) ──
-    { position: [-3.4, 0, -0.2], color: "#F9A8D4" },
-    { position: [3.4, 0, -0.2], color: "#FDE68A" },
+    { position: [-3.4, 0, -0.9], color: "#F9A8D4" },
+    { position: [3.4, 0, -0.9], color: "#FDE68A" },
     { position: [-1.95, 0, -3.15], color: "#A7F3D0" },
     { position: [1.95, 0, -3.15], color: "#FDE68A" },
     { position: [-9.95, 0, -1.85], color: "#F9A8D4" },
@@ -720,9 +674,9 @@ function CampusDecor() {
     // ── Extra plaza-ring flowers (5) ──
     { position: [-3.05, 0, 1.85], color: "#FDE68A" },
     { position: [3.05, 0, 1.85], color: "#F9A8D4" },
-    { position: [0, 0, -3.3], color: "#A7F3D0" },
-    { position: [2.65, 0, -2.65], color: "#FDE68A" },
-    { position: [-2.65, 0, -2.65], color: "#F9A8D4" },
+    { position: [-0.9, 0, -3.3], color: "#A7F3D0" },
+    { position: [4.0, 0, -2.0], color: "#FDE68A" },
+    { position: [-4.0, 0, -2.0], color: "#F9A8D4" },
     // ── Around AI Agent Lab (4) ──
     { position: [-2.9, 0, -5.6], color: "#A7F3D0" },
     { position: [2.9, 0, -5.6], color: "#A7F3D0" },
@@ -749,10 +703,29 @@ function CampusDecor() {
     { position: [-2.6, 0, 4.6], color: "#E9D5FF" },
     { position: [0, 0, 9.3], color: "#DDD6FE" },
     // ── Path-side flowers (4) ──
-    { position: [-1.55, 0, -1.6], color: "#FDE68A" },
-    { position: [1.55, 0, -1.6], color: "#F9A8D4" },
+    { position: [-2.5, 0, -1.0], color: "#FDE68A" },
+    { position: [2.5, 0, -1.0], color: "#F9A8D4" },
     { position: [-1.55, 0, 1.6], color: "#A7F3D0" },
-    { position: [1.55, 0, 1.6], color: "#FDE68A" }
+    { position: [1.55, 0, 1.6], color: "#FDE68A" },
+    // ── Phase 2F.9 Citizen Plaza garden clusters replacing central hedges (18) ──
+    { position: [-3.45, 0, -1.15], color: "#FDE68A" },
+    { position: [-3.7, 0, -0.78], color: "#F8FAFC" },
+    { position: [-3.35, 0, -1.05], color: "#BAE6FD" },
+    { position: [3.45, 0, -1.15], color: "#FDE68A" },
+    { position: [3.7, 0, -0.78], color: "#F8FAFC" },
+    { position: [3.35, 0, -1.05], color: "#BAE6FD" },
+    { position: [-3.45, 0, 1.15], color: "#FEF3C7" },
+    { position: [-3.72, 0, 0.76], color: "#FFFFFF" },
+    { position: [-3.3, 0, 1.1], color: "#CFFAFE" },
+    { position: [3.45, 0, 1.15], color: "#FEF3C7" },
+    { position: [3.72, 0, 0.76], color: "#FFFFFF" },
+    { position: [3.3, 0, 1.1], color: "#CFFAFE" },
+    { position: [-1.18, 0, -3.48], color: "#FDE68A" },
+    { position: [-0.72, 0, -3.68], color: "#F8FAFC" },
+    { position: [-1.55, 0, -3.2], color: "#BAE6FD" },
+    { position: [1.18, 0, -3.48], color: "#FDE68A" },
+    { position: [0.72, 0, -3.68], color: "#F8FAFC" },
+    { position: [1.55, 0, -3.2], color: "#BAE6FD" }
   ];
 
   return (
@@ -763,12 +736,22 @@ function CampusDecor() {
       {lamps.map((position, index) => (
         <Lamp key={index} position={position} />
       ))}
+      {outerLamps.map((position, index) => (
+        <Lamp key={`outer-${index}`} position={position} rotationOffset={Math.PI} />
+      ))}
       {benches.map(({ position, rotation }, index) => (
         <Bench key={index} position={position} rotation={rotation} />
       ))}
       {flowers.map(({ position, color }, index) => (
         <FlowerPatch key={index} position={position} color={color} />
       ))}
+      {/* Small shrubs only, replacing hedge mass without blocking sightlines */}
+      <SmallShrub position={[-3.72, 0, -1.1]} />
+      <SmallShrub position={[3.72, 0, -1.1]} />
+      <SmallShrub position={[-3.72, 0, 1.72]} />
+      <SmallShrub position={[3.72, 0, 1.72]} />
+      <SmallShrub position={[-1.9, 0, -3.48]} />
+      <SmallShrub position={[1.9, 0, -3.48]} />
       {/* Synty bush clusters */}
       <BushCluster position={[-6.5, 0, -5.2]} />
       <BushCluster position={[6.5, 0, -5.2]} />
@@ -784,13 +767,6 @@ function CampusDecor() {
       <BushCluster position={[6.6, 0, 11.7]} />
       <BushCluster position={[-2.8, 0, 12.6]} />
       <BushCluster position={[2.8, 0, 12.6]} />
-      {/* Hedges along key paths */}
-      <SyntyModel path="/assets/models/SM_Env_Hedge_01.glb" position={[-3.6, 0, -1.2]} scale={0.007} />
-      <SyntyModel path="/assets/models/SM_Env_Hedge_01.glb" position={[3.6, 0, -1.2]} scale={0.007} />
-      <SyntyModel path="/assets/models/SM_Env_Hedge_02.glb" position={[-3.6, 0, 1.2]} scale={0.007} />
-      <SyntyModel path="/assets/models/SM_Env_Hedge_02.glb" position={[3.6, 0, 1.2]} scale={0.007} />
-      <SyntyModel path="/assets/models/SM_Env_Hedge_03.glb" position={[-1.2, 0, -3.6]} scale={0.007} rotation={[0, Math.PI / 2, 0]} />
-      <SyntyModel path="/assets/models/SM_Env_Hedge_03.glb" position={[1.2, 0, -3.6]} scale={0.007} rotation={[0, Math.PI / 2, 0]} />
       {/* Rock clusters */}
       <SyntyModel path="/assets/models/SM_Generic_Small_Rocks_01.glb" position={[-5.5, 0, 3.8]} scale={0.012} />
       <SyntyModel path="/assets/models/SM_Generic_Small_Rocks_02.glb" position={[5.5, 0, 3.8]} scale={0.012} />
@@ -842,15 +818,19 @@ type LandmarkBuildingConfig = {
   rotation?: [number, number, number]
   labelHeight: number
   signZ: number
+  signPosition?: [number, number, number]
+  signRotation?: number
+  hidden?: boolean
 }
 
 const LANDMARK_BUILDINGS: Record<string, LandmarkBuildingConfig> = {
   "ai-agent-lab": {
     path: "/assets/models/SM_Bld_AIAgentLab_01.glb",
     ...tripoH(HEIGHT.BLD_L),
-    rotation: [0, Math.PI, 0],
+    rotation: [0, -Math.PI / 2, 0],
     labelHeight: HEIGHT.BLD_L,
     signZ: 2.75,
+    signPosition: [0, 3.72, 1.25],
   },
   "founder-tower": {
     path: "/assets/models/SM_Bld_FounderTower_01.glb",
@@ -858,13 +838,17 @@ const LANDMARK_BUILDINGS: Record<string, LandmarkBuildingConfig> = {
     rotation: [0, Math.PI * 0.88, 0],
     labelHeight: HEIGHT.TOWER,
     signZ: 2.05,
+    signPosition: [0.99, 2.22, 2.22],
+    signRotation: Math.PI * 2.38,
   },
   "knowledge-library": {
     path: "/assets/models/SM_Bld_KnowledgeLibrary_01.glb",
     ...tripoH(HEIGHT.BLD_M),
-    rotation: [0, Math.PI * 1.08, 0],
+    rotation: [0, Math.atan2(-8.6, -7.8), 0],
     labelHeight: HEIGHT.BLD_M,
     signZ: 2.1,
+    signPosition: [-1.33, 3.22, 1.47],
+    signRotation: Math.atan2(-7.8, 8.6),
   },
   "compute-center": {
     path: "/assets/models/SM_Bld_ComputeCenter_01.glb",
@@ -872,6 +856,8 @@ const LANDMARK_BUILDINGS: Record<string, LandmarkBuildingConfig> = {
     rotation: [0, -Math.PI / 2, 0],
     labelHeight: HEIGHT.BLD_M,
     signZ: 2.05,
+    signPosition: [-2.7, 3.22, -0.11],
+    signRotation: -Math.PI / 2,
   },
   "opportunity-center": {
     path: "/assets/models/SM_Bld_OpportunityCenter_01.glb",
@@ -879,6 +865,8 @@ const LANDMARK_BUILDINGS: Record<string, LandmarkBuildingConfig> = {
     rotation: [0, Math.PI / 2, 0],
     labelHeight: HEIGHT.BLD_M,
     signZ: 2.05,
+    signPosition: [2.0, 4.22, -0.08],
+    signRotation: Math.PI / 2,
   },
   "team-office": {
     path: "/assets/models/SM_Bld_TeamOffice_01.glb",
@@ -893,23 +881,32 @@ function LandmarkBuilding({ district, selected }: { district: District; selected
   const cfg = LANDMARK_BUILDINGS[district.id]
   if (!cfg) return null
 
+  const [bx, , bz] = district.position
+  const signPos: [number, number, number] = cfg.signPosition ?? [0, 1.22, cfg.signZ]
+  const signWorldX = bx + signPos[0]
+  const signWorldZ = bz + signPos[2]
+  const signRotation = cfg.signRotation ?? Math.atan2(-signWorldX, -signWorldZ)
+
   return (
     <group>
       <mesh receiveShadow position={[0, 0.025, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[selected ? 2.9 : 2.65, 48]} />
         <meshStandardMaterial color={selected ? artDirection.materials.warmPanel : artDirection.world.platform} roughness={0.78} />
       </mesh>
-      <TripoModel
-        path={cfg.path}
-        position={[0, 0, 0]}
-        scale={cfg.scale}
-        yOffset={cfg.yOffset ?? 0}
-        rotation={cfg.rotation}
-      />
+      {!cfg.hidden && (
+        <TripoModel
+          path={cfg.path}
+          position={[0, 0, 0]}
+          scale={cfg.scale}
+          yOffset={cfg.yOffset ?? 0}
+          rotation={cfg.rotation}
+        />
+      )}
       <DistrictSignBoard
         label={district.name.toUpperCase()}
-        position={[0, 1.22, cfg.signZ]}
+        position={signPos}
         accent={district.accentColor}
+        rotation={signRotation}
       />
       <DistrictProps district={district} />
     </group>
@@ -924,8 +921,7 @@ function DistrictProps({ district }: { district: District }) {
   if (district.id === "knowledge-library") {
     return (
       <group>
-        <SyntyModel path="/assets/models/SM_Prop_Bookshelf_01.glb" position={[-1.8, 0, d]} scale={0.01} rotation={[0, Math.PI, 0]} />
-        <SyntyModel path="/assets/models/SM_Prop_Bookshelf_02.glb" position={[1.8, 0, d]} scale={0.01} rotation={[0, Math.PI, 0]} />
+        {/* bookshelves hidden */}
       </group>
     )
   }
@@ -939,6 +935,7 @@ function DistrictProps({ district }: { district: District }) {
           title="OPPORTUNITY BOARD"
           lines={["Open Missions", "Team Matching", "Startup Work"]}
           position={[district.size[0] / 2 + 0.9, 0, 0.4]}
+          rotation={Math.atan2(-(district.position[0] + district.size[0] / 2 + 0.9), -(district.position[2] + 0.4))}
           accent={district.accentColor}
         />
       </group>
@@ -1020,16 +1017,18 @@ function DistrictSignBoard({
   label,
   position,
   accent,
-  wide = false
+  wide = false,
+  rotation = 0,
 }: {
   label: string;
   position: Vector3Tuple;
   accent: string;
   wide?: boolean;
+  rotation?: number;
 }) {
   const w = wide ? 4.6 : 3.0;
   return (
-    <group position={position}>
+    <group position={position} rotation={[0, rotation, 0]}>
       <mesh castShadow>
         <boxGeometry args={[w, 0.74, 0.13]} />
         <meshStandardMaterial color={accent} roughness={0.36} />
@@ -1047,15 +1046,17 @@ function InfoBoard({
   title,
   lines,
   position,
-  accent
+  accent,
+  rotation = 0,
 }: {
   title: string;
   lines: string[];
   position: Vector3Tuple;
   accent: string;
+  rotation?: number;
 }) {
   return (
-    <group position={position}>
+    <group position={position} rotation={[0, rotation, 0]}>
       {/* Post */}
       <mesh castShadow position={[0, 0.64, 0]}>
         <cylinderGeometry args={[0.04, 0.05, 1.28, 8]} />
@@ -1146,10 +1147,32 @@ function BushCluster({ position }: { position: Vector3Tuple; color?: string }) {
   return <SyntyModel path={paths[idx]} position={position} yOffset={-0.05} />
 }
 
-function FlowerPatch({ position }: { position: Vector3Tuple; color?: string }) {
+function SmallShrub({ position }: { position: Vector3Tuple }) {
+  const idx = Math.abs(Math.round(position[0] + position[2])) % 2
+  const paths = ["/assets/models/SM_Env_Bush_01.glb", "/assets/models/SM_Env_Bush_02.glb"]
+  return <SyntyModel path={paths[idx]} position={position} scale={0.006} yOffset={-0.04} />
+}
+
+function FlowerPatch({ position, color = "#FDE68A" }: { position: Vector3Tuple; color?: string }) {
   const idx = Math.abs(Math.round(position[0])) % 2
   const paths = ["/assets/models/SM_Env_FlowerPatch_01.glb", "/assets/models/SM_Env_FlowerPatch_02.glb"]
-  return <SyntyModel path={paths[idx]} position={position} />
+  const accents: { offset: Vector3Tuple; color: string }[] = [
+    { offset: [-0.18, 0.05, -0.12], color },
+    { offset: [0.14, 0.055, 0.08], color: "#F8FAFC" },
+    { offset: [0.02, 0.06, -0.2], color: "#BAE6FD" },
+  ]
+
+  return (
+    <group position={position}>
+      <SyntyModel path={paths[idx]} position={[0, 0, 0]} />
+      {accents.map(({ offset, color: accent }, index) => (
+        <mesh key={index} castShadow position={offset}>
+          <sphereGeometry args={[0.055, 8, 6]} />
+          <meshStandardMaterial color={accent} roughness={0.48} />
+        </mesh>
+      ))}
+    </group>
+  )
 }
 
 function Bench({ position, rotation }: { position: Vector3Tuple; rotation: number }) {
@@ -1162,11 +1185,15 @@ function Bench({ position, rotation }: { position: Vector3Tuple; rotation: numbe
   )
 }
 
-function Lamp({ position }: { position: Vector3Tuple }) {
+function Lamp({ position, rotationOffset = 0 }: { position: Vector3Tuple; rotationOffset?: number }) {
+  const [px, , pz] = position
+  // Rotate lamp arm to face island center [0,0]. Synty models face +Z by default.
+  const yaw = Math.atan2(-px, -pz) + rotationOffset
   return (
     <SyntyModel
       path="/assets/models/SM_Prop_Streetlamp_01.glb"
       position={position}
+      rotation={[0, yaw, 0]}
       scale={0.007}
     />
   )
@@ -1290,8 +1317,9 @@ function MeetingTable({ position, accent }: { position: Vector3Tuple; accent: st
 
 // ── Citizen Meshes ────────────────────────────────────────────────────────────
 
-// Target height in metres for all autoNorm citizens — must match scale={} prop on TripoModel
+// Target heights in metres for autoNorm citizens — must match scale={} prop on TripoModel
 const CITIZEN_TARGET_HEIGHT = 1.7
+const ROBOT_TARGET_HEIGHT   = 1.2  // cozy: robots shorter than humans
 
 const CITIZEN_MODELS_BY_TYPE: Record<string, { path: string; scale: number }> = {
   "agent-placeholder":         { path: "/assets/models/SM_Chr_RobotCitizen_01.glb",     scale: HEIGHT.ROBOT },
@@ -1304,6 +1332,313 @@ const HUMAN_MODELS = [
   "/assets/models/SM_Chr_HumanCitizen_02.glb",
 ]
 
+type AmbientWaypoint = {
+  id: string
+  position: Vector3Tuple
+  lookAt?: Vector3Tuple
+  waitSeconds?: number
+  district?: string
+}
+
+type ObstacleZone = {
+  id: string
+  type: "circle" | "rect"
+  position: Vector3Tuple
+  radius?: number
+  size?: [number, number]
+}
+
+const CITIZEN_COLLISION_RADIUS = 0.42
+const CITIZEN_AVOIDANCE_RADIUS = 0.88
+const OBSTACLE_PADDING = 0.34
+
+const OBSTACLE_ZONES: ObstacleZone[] = [
+  // Landmark buildings
+  { id: "founder-tower-building", type: "rect", position: [-7.8, 0, -8.6], size: [2.75, 2.45] },
+  { id: "ai-agent-lab-building", type: "rect", position: [0, 0, -8.8], size: [3.6, 2.65] },
+  { id: "knowledge-library-building", type: "rect", position: [7.8, 0, -8.6], size: [3.1, 2.45] },
+  { id: "opportunity-center-building", type: "rect", position: [-8.7, 0, 0.35], size: [3.0, 1.95] },
+  { id: "compute-center-building", type: "rect", position: [8.7, 0, 0.35], size: [2.95, 1.95] },
+  { id: "team-office-building", type: "rect", position: [0, 0, 7.7], size: [3.35, 2.05] },
+  // Plaza core props and boards
+  { id: "plaza-fountain", type: "circle", position: [0, 0, 0], radius: 1.05 },
+  { id: "plaza-welcome-board", type: "rect", position: [-3.5, 0, 14.0], size: [1.55, 0.72] },
+  { id: "plaza-campus-map-board", type: "rect", position: [1.1, 0, 3.05], size: [1.7, 0.76] },
+  { id: "plaza-registry-board", type: "rect", position: [2.75, 0, 2.6], size: [1.55, 0.72] },
+  // District boards / large props
+  { id: "opportunity-board", type: "rect", position: [-5.5, 0, 0.75], size: [1.75, 0.82] },
+  { id: "compute-screen", type: "rect", position: [8.7, 0, 2.1], size: [1.5, 0.82] },
+  { id: "team-office-desks", type: "rect", position: [0, 0, 5.5], size: [3.4, 0.95] },
+  { id: "knowledge-bookshelves", type: "rect", position: [7.8, 0, -6.85], size: [4.8, 0.95] },
+  // Large trees and old hedge garden footprints
+  { id: "plaza-tree-nw", type: "circle", position: [-2.8, 0, 2.25], radius: 0.58 },
+  { id: "plaza-tree-ne", type: "circle", position: [2.8, 0, 2.25], radius: 0.58 },
+  { id: "plaza-tree-sw", type: "circle", position: [-2.95, 0, -2.2], radius: 0.58 },
+  { id: "plaza-tree-se", type: "circle", position: [2.95, 0, -2.2], radius: 0.58 },
+  { id: "plaza-garden-west", type: "rect", position: [-3.55, 0, 0.35], size: [0.95, 3.35] },
+  { id: "plaza-garden-east", type: "rect", position: [3.55, 0, 0.35], size: [0.95, 3.35] },
+  { id: "plaza-garden-north", type: "rect", position: [0, 0, -3.45], size: [4.0, 0.95] },
+  { id: "ai-lab-trees-left", type: "circle", position: [-3.2, 0, -7.35], radius: 0.65 },
+  { id: "ai-lab-trees-right", type: "circle", position: [3.2, 0, -7.35], radius: 0.65 },
+  { id: "founder-tree-cluster", type: "circle", position: [-6.1, 0, -10.9], radius: 0.75 },
+  { id: "knowledge-tree-cluster", type: "circle", position: [6.1, 0, -10.9], radius: 0.75 },
+  { id: "opportunity-tree-cluster", type: "circle", position: [-9.8, 0, 3.8], radius: 0.75 },
+  { id: "compute-tree-cluster", type: "circle", position: [9.8, 0, 3.8], radius: 0.75 },
+]
+
+const AMBIENT_WAYPOINTS_BY_DISTRICT: Record<string, AmbientWaypoint[]> = {
+  "Citizen Plaza": [
+    { id: "plaza-fountain-west", position: [-1.35, 0, -0.25], lookAt: [0, 0, 0], waitSeconds: 3, district: "Citizen Plaza" },
+    { id: "plaza-welcome", position: [-1.95, 0, 1.45], lookAt: [-2.75, 0, 2.6], waitSeconds: 4, district: "Citizen Plaza" },
+    { id: "plaza-campus-map", position: [-0.55, 0, 2.15], lookAt: [1.1, 0, 3.05], waitSeconds: 4, district: "Citizen Plaza" },
+    { id: "plaza-registry", position: [1.95, 0, 1.55], lookAt: [2.75, 0, 2.6], waitSeconds: 4, district: "Citizen Plaza" },
+    { id: "plaza-fountain-east", position: [1.35, 0, -0.2], lookAt: [0, 0, 0], waitSeconds: 3, district: "Citizen Plaza" },
+    { id: "plaza-south-social", position: [0.2, 0, -2.45], lookAt: [0, 0, 0], waitSeconds: 3, district: "Citizen Plaza" },
+  ],
+  "AI Agent Lab": [
+    { id: "ai-lab-front-left", position: [-2.2, 0, -5.1], lookAt: [0, 0, -8.8], waitSeconds: 4, district: "AI Agent Lab" },
+    { id: "ai-lab-front-right", position: [2.2, 0, -5.1], lookAt: [0, 0, -8.8], waitSeconds: 4, district: "AI Agent Lab" },
+    { id: "ai-lab-path-center", position: [0, 0, -4.25], lookAt: [0, 0, -8.8], waitSeconds: 3, district: "AI Agent Lab" },
+    { id: "ai-lab-side-left", position: [-3.75, 0, -6.55], lookAt: [0, 0, -8.8], waitSeconds: 3, district: "AI Agent Lab" },
+    { id: "ai-lab-side-right", position: [3.75, 0, -6.55], lookAt: [0, 0, -8.8], waitSeconds: 3, district: "AI Agent Lab" },
+  ],
+  "Founder Tower": [
+    { id: "founder-entry", position: [-7.1, 0, -6.25], lookAt: [-7.8, 0, -8.6], waitSeconds: 5, district: "Founder Tower" },
+    { id: "founder-path", position: [-6.05, 0, -7.45], lookAt: [-7.8, 0, -8.6], waitSeconds: 4, district: "Founder Tower" },
+    { id: "founder-bench", position: [-8.65, 0, -6.95], lookAt: [-7.8, 0, -8.6], waitSeconds: 4, district: "Founder Tower" },
+  ],
+  "Knowledge Library": [
+    { id: "knowledge-entry-left", position: [6.1, 0, -6.25], lookAt: [7.8, 0, -8.6], waitSeconds: 4, district: "Knowledge Library" },
+    { id: "knowledge-entry-right", position: [8.85, 0, -6.15], lookAt: [7.8, 0, -8.6], waitSeconds: 4, district: "Knowledge Library" },
+    { id: "knowledge-bookshelf-left", position: [5.1, 0, -5.8], lookAt: [6.0, 0, -6.85], waitSeconds: 5, district: "Knowledge Library" },
+    { id: "knowledge-bookshelf-right", position: [9.15, 0, -5.8], lookAt: [8.8, 0, -6.85], waitSeconds: 5, district: "Knowledge Library" },
+  ],
+  "Opportunity Center": [
+    { id: "opportunity-board", position: [-7.0, 0, 1.05], lookAt: [-6.0, 0, 0.75], waitSeconds: 5, district: "Opportunity Center" },
+    { id: "opportunity-market", position: [-8.65, 0, 2.75], lookAt: [-8.7, 0, 0.35], waitSeconds: 4, district: "Opportunity Center" },
+    { id: "opportunity-path", position: [-6.25, 0, 2.25], lookAt: [-8.7, 0, 0.35], waitSeconds: 3, district: "Opportunity Center" },
+    { id: "opportunity-side", position: [-9.75, 0, 1.35], lookAt: [-8.7, 0, 0.35], waitSeconds: 4, district: "Opportunity Center" },
+  ],
+  "Compute Center": [
+    { id: "compute-entry", position: [7.0, 0, 1.25], lookAt: [8.7, 0, 0.35], waitSeconds: 4, district: "Compute Center" },
+    { id: "compute-screen", position: [7.25, 0, 1.85], lookAt: [8.7, 0, 2.1], waitSeconds: 5, district: "Compute Center" },
+    { id: "compute-pond", position: [6.55, 0, 2.55], lookAt: [6.7, 0, 5.7], waitSeconds: 3, district: "Compute Center" },
+    { id: "compute-side", position: [10.1, 0, 2.0], lookAt: [8.7, 0, 0.35], waitSeconds: 4, district: "Compute Center" },
+  ],
+  "Team Office": [
+    { id: "team-entry-left", position: [-1.45, 0, 4.65], lookAt: [0, 0, 7.7], waitSeconds: 4, district: "Team Office" },
+    { id: "team-entry-right", position: [1.25, 0, 4.75], lookAt: [0, 0, 7.7], waitSeconds: 4, district: "Team Office" },
+    { id: "team-table", position: [0, 0, 4.25], lookAt: [0, 0, 7.7], waitSeconds: 5, district: "Team Office" },
+    { id: "team-path", position: [2.65, 0, 4.05], lookAt: [0, 0, 7.7], waitSeconds: 3, district: "Team Office" },
+  ],
+}
+
+function hashCitizenId(id: string) {
+  return Array.from(id).reduce((sum, char) => sum + char.charCodeAt(0), 0)
+}
+
+function rotateWaypoints(waypoints: AmbientWaypoint[], offset: number) {
+  if (waypoints.length === 0) return waypoints
+  const pivot = offset % waypoints.length
+  return [...waypoints.slice(pivot), ...waypoints.slice(0, pivot)]
+}
+
+function getAmbientRoute(citizen: CitizenManifest): AmbientWaypoint[] {
+  const base = AMBIENT_WAYPOINTS_BY_DISTRICT[citizen.location.district]
+  if (!base?.length) return []
+
+  const seed = hashCitizenId(citizen.citizen_id)
+  const [x, y, z] = citizen.location.coordinates
+  const districtTarget = base[seed % base.length]?.lookAt ?? base[seed % base.length]?.position
+
+  return [
+    {
+      id: `${citizen.citizen_id}-home`,
+      position: [x, y, z],
+      lookAt: districtTarget,
+      waitSeconds: 1.5 + (seed % 4) * 0.45,
+      district: citizen.location.district,
+    },
+    ...rotateWaypoints(base, seed),
+  ]
+}
+
+// ── POI Wander System (cross-district, animated citizens only) ─────────────────
+
+const IDLE_DURATIONS_S = [2, 5, 10] as const  // idle_short / idle_medium / idle_long
+
+const WANDER_POIS: AmbientWaypoint[] = [
+  { id: "wp-plaza-fountain-w",  position: [-1.35, 0, -0.25], lookAt: [0, 0, 0] },
+  { id: "wp-plaza-campus-map",  position: [-0.55, 0,  2.15], lookAt: [1.1, 0, 3.05] },
+  { id: "wp-plaza-registry",    position: [ 1.95, 0,  1.55], lookAt: [2.75, 0, 2.6] },
+  { id: "wp-plaza-south",       position: [ 0.20, 0, -2.45], lookAt: [0, 0, 0] },
+  { id: "wp-ai-lab-path",       position: [ 0.00, 0, -4.25], lookAt: [0, 0, -8.8] },
+  { id: "wp-ai-lab-left",       position: [-2.20, 0, -5.10], lookAt: [0, 0, -8.8] },
+  { id: "wp-founder-entry",     position: [-7.10, 0, -6.25], lookAt: [-7.8, 0, -8.6] },
+  { id: "wp-founder-path",      position: [-6.05, 0, -7.45], lookAt: [-7.8, 0, -8.6] },
+  { id: "wp-knowledge-entry",   position: [ 6.10, 0, -6.25], lookAt: [7.8, 0, -8.6] },
+  { id: "wp-knowledge-shelf",   position: [ 5.10, 0, -5.80], lookAt: [6.0, 0, -6.85] },
+  { id: "wp-opportunity-board", position: [-7.00, 0,  1.05], lookAt: [-6.0, 0, 0.75] },
+  { id: "wp-opportunity-path",  position: [-6.25, 0,  2.25], lookAt: [-8.7, 0, 0.35] },
+  { id: "wp-compute-entry",     position: [ 7.00, 0,  1.25], lookAt: [8.7, 0, 0.35] },
+  { id: "wp-compute-pond",      position: [ 6.55, 0,  2.55], lookAt: [6.7, 0, 5.7] },
+  { id: "wp-team-entry",        position: [-1.45, 0,  4.65], lookAt: [0, 0, 7.7] },
+  { id: "wp-team-table",        position: [ 0.00, 0,  4.25], lookAt: [0, 0, 7.7] },
+]
+
+function pickIdleDuration(): number {
+  return IDLE_DURATIONS_S[Math.floor(Math.random() * IDLE_DURATIONS_S.length)]
+}
+
+// Ellipse approximation of the inner grass area — citizens must stay within this.
+// innerGrassShape uses radiusX=13.4, radiusZ=11.5; we keep a safe margin inside.
+function isPointInsideIsland(x: number, z: number): boolean {
+  const rx = 11.5
+  const rz = 10.0
+  return (x * x) / (rx * rx) + (z * z) / (rz * rz) < 1.0
+}
+
+function getWanderRoute(startPos: Vector3Tuple, seed: number): AmbientWaypoint[] {
+  const safePois = WANDER_POIS.filter(p => isPointInsideIsland(p.position[0], p.position[2]))
+  return [
+    { id: "wanderer-home", position: startPos, waitSeconds: pickIdleDuration() },
+    ...rotateWaypoints(safePois, seed % Math.max(safePois.length, 1)),
+  ]
+}
+
+const citizenPositionRegistry = new Map<string, THREE.Vector3>()
+
+function isPointInObstacle(point: Vector3Tuple | THREE.Vector3, zone: ObstacleZone, padding = OBSTACLE_PADDING) {
+  const px = Array.isArray(point) ? point[0] : point.x
+  const pz = Array.isArray(point) ? point[2] : point.z
+  const zx = zone.position[0]
+  const zz = zone.position[2]
+
+  if (zone.type === "circle") {
+    const radius = (zone.radius ?? 0) + padding
+    return Math.hypot(px - zx, pz - zz) < radius
+  }
+
+  const [width, depth] = zone.size ?? [0, 0]
+  return Math.abs(px - zx) < width / 2 + padding && Math.abs(pz - zz) < depth / 2 + padding
+}
+
+function isPointBlocked(point: Vector3Tuple | THREE.Vector3) {
+  return OBSTACLE_ZONES.some((zone) => isPointInObstacle(point, zone))
+}
+
+function segmentIntersectsObstacle(from: THREE.Vector3, to: Vector3Tuple) {
+  const target = new THREE.Vector3(...to)
+  const distance = from.distanceTo(target)
+  const steps = Math.max(2, Math.ceil(distance / 0.35))
+
+  for (let step = 1; step <= steps; step += 1) {
+    const t = step / steps
+    const point = from.clone().lerp(target, t)
+    if (isPointBlocked(point)) return true
+  }
+
+  return false
+}
+
+function getObstaclePushVector(position: THREE.Vector3) {
+  const push = new THREE.Vector3()
+
+  OBSTACLE_ZONES.forEach((zone) => {
+    const zx = zone.position[0]
+    const zz = zone.position[2]
+
+    if (zone.type === "circle") {
+      const limit = (zone.radius ?? 0) + OBSTACLE_PADDING
+      const dx = position.x - zx
+      const dz = position.z - zz
+      const distance = Math.hypot(dx, dz)
+      if (distance > 0.0001 && distance < limit) {
+        const strength = (limit - distance) / limit
+        push.x += (dx / distance) * strength
+        push.z += (dz / distance) * strength
+      }
+      return
+    }
+
+    const [width, depth] = zone.size ?? [0, 0]
+    const halfW = width / 2 + OBSTACLE_PADDING
+    const halfD = depth / 2 + OBSTACLE_PADDING
+    const dx = position.x - zx
+    const dz = position.z - zz
+    if (Math.abs(dx) >= halfW || Math.abs(dz) >= halfD) return
+
+    const escapeX = halfW - Math.abs(dx)
+    const escapeZ = halfD - Math.abs(dz)
+    if (escapeX < escapeZ) {
+      push.x += (dx >= 0 ? 1 : -1) * (escapeX / halfW)
+    } else {
+      push.z += (dz >= 0 ? 1 : -1) * (escapeZ / halfD)
+    }
+  })
+
+  return push
+}
+
+function getCitizenAvoidanceVector(id: string, position: THREE.Vector3) {
+  const push = new THREE.Vector3()
+
+  citizenPositionRegistry.forEach((otherPosition, otherId) => {
+    if (otherId === id) return
+
+    const dx = position.x - otherPosition.x
+    const dz = position.z - otherPosition.z
+    const distance = Math.hypot(dx, dz)
+    if (distance < 0.0001 || distance >= CITIZEN_AVOIDANCE_RADIUS) return
+
+    const collisionBoost = distance < CITIZEN_COLLISION_RADIUS ? 1.45 : 1
+    const strength = ((CITIZEN_AVOIDANCE_RADIUS - distance) / CITIZEN_AVOIDANCE_RADIUS) * collisionBoost
+    push.x += (dx / distance) * strength
+    push.z += (dz / distance) * strength
+  })
+
+  return push
+}
+
+function findReachableWaypoint(route: AmbientWaypoint[], startIndex: number, from: THREE.Vector3) {
+  for (let attempt = 0; attempt < route.length; attempt += 1) {
+    const index = (startIndex + attempt) % route.length
+    const waypoint = route[index]
+    if (!isPointBlocked(waypoint.position) && !segmentIntersectsObstacle(from, waypoint.position)) {
+      return { waypoint, index }
+    }
+  }
+
+  return undefined
+}
+
+function yawToward(from: THREE.Vector3, to: Vector3Tuple | THREE.Vector3) {
+  const targetX = Array.isArray(to) ? to[0] : to.x
+  const targetZ = Array.isArray(to) ? to[2] : to.z
+  const dx = targetX - from.x
+  const dz = targetZ - from.z
+  if (Math.hypot(dx, dz) < 0.001) return undefined
+  return Math.atan2(-dz, dx)
+}
+
+function shortestAngleDelta(current: number, target: number) {
+  return Math.atan2(Math.sin(target - current), Math.cos(target - current))
+}
+
+function getCitizenPlazaLookRotation(citizen: CitizenManifest): [number, number, number] | undefined {
+  if (citizen.location.district !== "Citizen Plaza") return undefined
+
+  const [x, , z] = citizen.location.coordinates
+  const targetX = 0
+  const targetZ = 0
+  const dx = targetX - x
+  const dz = targetZ - z
+  if (Math.hypot(dx, dz) < 0.001) return undefined
+
+  // Tripo citizen meshes face local +X at zero rotation, so yaw the +X axis toward the plaza center.
+  return [0, Math.atan2(-dz, dx), 0]
+}
+
 function getCitizenModel(citizen: CitizenManifest): { path: string; scale: number } | undefined {
   if (citizen.avatar_type in CITIZEN_MODELS_BY_TYPE) {
     return CITIZEN_MODELS_BY_TYPE[citizen.avatar_type]
@@ -1315,17 +1650,319 @@ function getCitizenModel(citizen: CitizenManifest): { path: string; scale: numbe
   return undefined
 }
 
-function CitizenMesh({ citizen }: { citizen: CitizenManifest }) {
+// ── Animated Wanderer (Layla Chen + Workizen Guide) ───────────────────────────
+
+function AnimatedWandererBody({
+  isMovingRef,
+}: {
+  isMovingRef: { current: boolean }
+}) {
+  const idleGroupRef = useRef<THREE.Group>(null)
+  const walkGroupRef = useRef<THREE.Group>(null)
+
+  const idleGltf = useGLTF(ANIM_IDLE_PATH)
+  const walkGltf = useGLTF(ANIM_WALK_PATH)
+
+  const idleClone = useMemo(() => cloneSkeleton(idleGltf.scene), [idleGltf.scene])
+  const walkClone = useMemo(() => cloneSkeleton(walkGltf.scene), [walkGltf.scene])
+
+  const { scaleFactor, groundOffset } = useMemo(() => {
+    const sc = idleGltf.scene
+    sc.updateMatrixWorld(true)
+    const box = new THREE.Box3().setFromObject(sc)
+    const h = Math.max(box.max.y - box.min.y, 0.001)
+    const sf = CITIZEN_TARGET_HEIGHT / h
+    return { scaleFactor: sf, groundOffset: -box.min.y * sf }
+  }, [idleGltf.scene])
+
+  const { actions: idleActions } = useAnimations(idleGltf.animations, idleGroupRef)
+  const { actions: walkActions } = useAnimations(walkGltf.animations, walkGroupRef)
+
+  useEffect(() => {
+    const clip = idleGltf.animations[0]
+    if (clip) idleActions[clip.name]?.reset().setLoop(THREE.LoopRepeat, Infinity).play()
+  }, [idleActions, idleGltf.animations])
+
+  useEffect(() => {
+    const clip = walkGltf.animations[0]
+    if (clip) walkActions[clip.name]?.reset().setLoop(THREE.LoopRepeat, Infinity).play()
+  }, [walkActions, walkGltf.animations])
+
+  // Toggle visibility directly on Three.js objects — zero React re-renders
+  useFrame(() => {
+    if (idleGroupRef.current) idleGroupRef.current.visible = !isMovingRef.current
+    if (walkGroupRef.current) walkGroupRef.current.visible = isMovingRef.current
+  })
+
+  return (
+    <>
+      <group ref={idleGroupRef} position={[0, groundOffset, 0]} scale={scaleFactor}>
+        <primitive object={idleClone} />
+      </group>
+      <group ref={walkGroupRef} position={[0, groundOffset, 0]} scale={scaleFactor}>
+        <primitive object={walkClone} />
+      </group>
+    </>
+  )
+}
+
+function AnimatedWandererMesh({
+  citizenId,
+  startPosition,
+  name,
+  accentColor,
+  onSelect,
+}: {
+  citizenId: string
+  startPosition: Vector3Tuple
+  name: string
+  accentColor: string
+  onSelect: () => void
+}) {
+  const [x, , z] = startPosition
+  const moverRef = useRef<THREE.Group>(null)
+  const modelShellRef = useRef<THREE.Group>(null)
+  const isMovingRef = useRef(false)
+
+  const seed = hashCitizenId(citizenId)
+  const wanderRoute = useMemo(() => getWanderRoute(startPosition, seed), [startPosition, seed])
+
+  const ambientState = useRef({
+    position: new THREE.Vector3(x, 0, z),
+    waypointIndex: 1,
+    waitSeconds: wanderRoute[0]?.waitSeconds ?? pickIdleDuration(),
+    waitLookAt: undefined as Vector3Tuple | undefined,
+    speed: 0.26 + (seed % 5) * 0.025,
+  })
+
+  useEffect(() => {
+    ambientState.current.position.set(x, 0, z)
+    ambientState.current.waypointIndex = 1
+    moverRef.current?.position.set(x, 0, z)
+    citizenPositionRegistry.set(citizenId, ambientState.current.position.clone())
+  }, [citizenId, x, z])
+
+  useEffect(() => {
+    return () => { citizenPositionRegistry.delete(citizenId) }
+  }, [citizenId])
+
+  useFrame((_, delta) => {
+    if (!moverRef.current || wanderRoute.length === 0) return
+    const state = ambientState.current
+
+    const obstacleRecovery = getObstaclePushVector(state.position)
+    if (obstacleRecovery.lengthSq() > 0.0001) {
+      const recovered = state.position.clone().addScaledVector(obstacleRecovery.normalize(), delta * 0.55)
+      if (isPointInsideIsland(recovered.x, recovered.z)) {
+        state.position.copy(recovered)
+      } else {
+        // Recovery would leave island — nudge toward origin instead
+        const toCenter = new THREE.Vector3(-state.position.x, 0, -state.position.z).normalize()
+        state.position.addScaledVector(toCenter, delta * 0.55)
+      }
+      moverRef.current.position.copy(state.position)
+      citizenPositionRegistry.set(citizenId, state.position.clone())
+      isMovingRef.current = false
+      return
+    }
+
+    const reachable = findReachableWaypoint(wanderRoute, state.waypointIndex, state.position)
+    if (!reachable) {
+      state.waitSeconds = Math.max(state.waitSeconds, 0.5)
+      isMovingRef.current = false
+      citizenPositionRegistry.set(citizenId, state.position.clone())
+      return
+    }
+
+    state.waypointIndex = reachable.index
+    const waypoint = reachable.waypoint
+
+    if (state.waitSeconds > 0) {
+      state.waitSeconds = Math.max(0, state.waitSeconds - delta)
+      isMovingRef.current = false
+      const yaw = state.waitLookAt ? yawToward(state.position, state.waitLookAt) : undefined
+      if (yaw !== undefined && modelShellRef.current) {
+        modelShellRef.current.rotation.y += shortestAngleDelta(modelShellRef.current.rotation.y, yaw) * Math.min(1, delta * 4)
+      }
+      if (state.waitSeconds === 0) state.waitLookAt = undefined
+      citizenPositionRegistry.set(citizenId, state.position.clone())
+      return
+    }
+
+    const target = new THREE.Vector3(...waypoint.position)
+    const direction = target.sub(state.position)
+    const distance = direction.length()
+
+    if (distance < 0.045) {
+      state.position.set(...waypoint.position)
+      moverRef.current.position.copy(state.position)
+      state.waypointIndex = (state.waypointIndex + 1) % wanderRoute.length
+      state.waitSeconds = pickIdleDuration()
+      state.waitLookAt = waypoint.lookAt
+      isMovingRef.current = false
+      citizenPositionRegistry.set(citizenId, state.position.clone())
+      return
+    }
+
+    direction.normalize()
+    const proposed = state.position.clone().addScaledVector(direction, Math.min(distance, state.speed * delta))
+    const obstPush = getObstaclePushVector(proposed)
+    const citizenPush = getCitizenAvoidanceVector(citizenId, proposed)
+    if (obstPush.lengthSq() > 0.0001) proposed.addScaledVector(obstPush.normalize(), delta * 0.62)
+    if (citizenPush.lengthSq() > 0.0001) proposed.addScaledVector(citizenPush.normalize(), delta * 0.38)
+
+    if (isPointBlocked(proposed) || !isPointInsideIsland(proposed.x, proposed.z)) {
+      state.waypointIndex = (state.waypointIndex + 1) % wanderRoute.length
+      state.waitSeconds = 0.35
+      isMovingRef.current = false
+      citizenPositionRegistry.set(citizenId, state.position.clone())
+      return
+    }
+
+    state.position.copy(proposed)
+    moverRef.current.position.copy(state.position)
+    citizenPositionRegistry.set(citizenId, state.position.clone())
+    isMovingRef.current = true
+
+    if (modelShellRef.current) {
+      const yaw = Math.atan2(-direction.z, direction.x)
+      modelShellRef.current.rotation.y += shortestAngleDelta(modelShellRef.current.rotation.y, yaw) * Math.min(1, delta * 6)
+    }
+  })
+
+  return (
+    <group ref={moverRef} position={[x, 0, z]} onClick={(event) => stopAndRun(event, onSelect)}>
+      <group ref={modelShellRef}>
+        <Suspense fallback={null}>
+          <AnimatedWandererBody isMovingRef={isMovingRef} />
+        </Suspense>
+      </group>
+      <Label text={name} position={[0, CITIZEN_TARGET_HEIGHT + 0.2, 0]} color={accentColor} small />
+    </group>
+  )
+}
+
+function LegacyCitizenMesh({ citizen }: { citizen: CitizenManifest }) {
   const select = useCampusStore((state) => state.select);
   const [x, , z] = citizen.location.coordinates;
+  const moverRef = useRef<THREE.Group>(null)
+  const modelShellRef = useRef<THREE.Group>(null)
   const isComputeDevice = citizen.avatar_type === "device-placeholder";
+  const isRobot = citizen.avatar_type === "agent-placeholder";
   const tripoModel = getCitizenModel(citizen);
-  const labelBaseY = isComputeDevice ? HEIGHT.DEVICE : (tripoModel ? CITIZEN_TARGET_HEIGHT + 0.2 : 1.35)
+  const citizenTargetH = isRobot ? ROBOT_TARGET_HEIGHT : CITIZEN_TARGET_HEIGHT
+  const canAmbientMove = Boolean(tripoModel && !isComputeDevice)
+  const ambientRoute = useMemo(() => (canAmbientMove ? getAmbientRoute(citizen) : []), [canAmbientMove, citizen])
+  const ambientState = useRef({
+    position: new THREE.Vector3(x, 0, z),
+    waypointIndex: 1,
+    waitSeconds: 0,
+    waitLookAt: undefined as Vector3Tuple | undefined,
+    speed: 0.26 + (hashCitizenId(citizen.citizen_id) % 5) * 0.025,
+  })
+  const modelRotation = getCitizenPlazaLookRotation(citizen)
+  const labelBaseY = isComputeDevice ? HEIGHT.DEVICE : (tripoModel ? citizenTargetH + 0.2 : 1.35)
   const typeColor = getCitizenTypeColor(citizen.citizen_type)
+
+  useEffect(() => {
+    ambientState.current.position.set(x, 0, z)
+    ambientState.current.waypointIndex = ambientRoute.length > 1 ? 1 : 0
+    ambientState.current.waitSeconds = ambientRoute[0]?.waitSeconds ?? 0
+    ambientState.current.waitLookAt = ambientRoute[0]?.lookAt
+    moverRef.current?.position.set(x, 0, z)
+    if (canAmbientMove) {
+      citizenPositionRegistry.set(citizen.citizen_id, ambientState.current.position.clone())
+    }
+  }, [ambientRoute, x, z])
+
+  useEffect(() => {
+    return () => {
+      citizenPositionRegistry.delete(citizen.citizen_id)
+    }
+  }, [citizen.citizen_id])
+
+  useFrame((_, delta) => {
+    if (!canAmbientMove || ambientRoute.length === 0 || !moverRef.current) return
+
+    const state = ambientState.current
+    const obstacleRecovery = getObstaclePushVector(state.position)
+    if (obstacleRecovery.lengthSq() > 0.0001) {
+      obstacleRecovery.normalize()
+      state.position.addScaledVector(obstacleRecovery, delta * 0.55)
+      moverRef.current.position.copy(state.position)
+      citizenPositionRegistry.set(citizen.citizen_id, state.position.clone())
+      return
+    }
+
+    const reachable = findReachableWaypoint(ambientRoute, state.waypointIndex, state.position)
+    if (!reachable) {
+      state.waitSeconds = Math.max(state.waitSeconds, 0.5)
+      citizenPositionRegistry.set(citizen.citizen_id, state.position.clone())
+      return
+    }
+
+    state.waypointIndex = reachable.index
+    const waypoint = reachable.waypoint
+
+    if (state.waitSeconds > 0) {
+      state.waitSeconds = Math.max(0, state.waitSeconds - delta)
+      const yaw = state.waitLookAt ? yawToward(state.position, state.waitLookAt) : undefined
+      if (yaw !== undefined && modelShellRef.current) {
+        modelShellRef.current.rotation.y += shortestAngleDelta(modelShellRef.current.rotation.y, yaw) * Math.min(1, delta * 4)
+      }
+      if (state.waitSeconds === 0) {
+        state.waitLookAt = undefined
+      }
+      citizenPositionRegistry.set(citizen.citizen_id, state.position.clone())
+      return
+    }
+
+    const target = new THREE.Vector3(...waypoint.position)
+    const direction = target.sub(state.position)
+    const distance = direction.length()
+
+    if (distance < 0.045) {
+      state.position.set(...waypoint.position)
+      moverRef.current.position.copy(state.position)
+      state.waypointIndex = (state.waypointIndex + 1) % ambientRoute.length
+      state.waitSeconds = waypoint.waitSeconds ?? 3
+      state.waitLookAt = waypoint.lookAt
+      return
+    }
+
+    direction.normalize()
+    const proposedPosition = state.position.clone().addScaledVector(direction, Math.min(distance, state.speed * delta))
+    const proposedObstaclePush = getObstaclePushVector(proposedPosition)
+    const proposedCitizenPush = getCitizenAvoidanceVector(citizen.citizen_id, proposedPosition)
+
+    if (proposedObstaclePush.lengthSq() > 0.0001) {
+      proposedPosition.addScaledVector(proposedObstaclePush.normalize(), delta * 0.62)
+    }
+    if (proposedCitizenPush.lengthSq() > 0.0001) {
+      proposedPosition.addScaledVector(proposedCitizenPush.normalize(), delta * 0.38)
+    }
+
+    if (isPointBlocked(proposedPosition)) {
+      state.waypointIndex = (state.waypointIndex + 1) % ambientRoute.length
+      state.waitSeconds = 0.35
+      citizenPositionRegistry.set(citizen.citizen_id, state.position.clone())
+      return
+    }
+
+    state.position.copy(proposedPosition)
+    moverRef.current.position.copy(state.position)
+    citizenPositionRegistry.set(citizen.citizen_id, state.position.clone())
+
+    if (modelShellRef.current) {
+      const yaw = Math.atan2(-direction.z, direction.x)
+      modelShellRef.current.rotation.y += shortestAngleDelta(modelShellRef.current.rotation.y, yaw) * Math.min(1, delta * 6)
+    }
+  })
 
   return (
     <Float speed={0.85} rotationIntensity={0.04} floatIntensity={0.07}>
       <group
+        ref={moverRef}
         position={[x, 0, z]}
         onClick={(event) => stopAndRun(event, () => select({ kind: "citizen", id: citizen.citizen_id }))}
       >
@@ -1342,7 +1979,9 @@ function CitizenMesh({ citizen }: { citizen: CitizenManifest }) {
             </mesh>
           </>
         ) : tripoModel ? (
-          <TripoModel path={tripoModel.path} scale={CITIZEN_TARGET_HEIGHT} autoNorm position={[0, 0, 0]} />
+          <group ref={modelShellRef} rotation={modelRotation}>
+            <TripoModel path={tripoModel.path} scale={citizenTargetH} autoNorm position={[0, 0, 0]} />
+          </group>
         ) : (
           // Fallback procedural human
           <>
@@ -1374,6 +2013,22 @@ function CitizenMesh({ citizen }: { citizen: CitizenManifest }) {
       </group>
     </Float>
   );
+}
+
+function CitizenMesh({ citizen }: { citizen: CitizenManifest }) {
+  const select = useCampusStore((state) => state.select)
+  if (citizen.citizen_id === "human-plaza-01") {
+    return (
+      <AnimatedWandererMesh
+        citizenId={citizen.citizen_id}
+        startPosition={citizen.location.coordinates}
+        name={citizen.name}
+        accentColor={citizen.accentColor}
+        onSelect={() => select({ kind: "citizen", id: citizen.citizen_id })}
+      />
+    )
+  }
+  return <LegacyCitizenMesh citizen={citizen} />
 }
 
 function getCitizenTypeColor(type: CitizenManifest["citizen_type"]) {
@@ -1409,6 +2064,17 @@ function CitizenTypeBadge({
 
 function NpcMesh({ npc }: { npc: Npc }) {
   const select = useCampusStore((state) => state.select);
+  if (npc.id === "workizen-guide") {
+    return (
+      <AnimatedWandererMesh
+        citizenId={npc.id}
+        startPosition={npc.position}
+        name={npc.name}
+        accentColor={npc.accentColor}
+        onSelect={() => select({ kind: "npc", id: npc.id })}
+      />
+    )
+  }
   const [x, , z] = npc.position;
 
   return (
@@ -1499,13 +2165,9 @@ function SceneContents() {
       {npcs.map((npc) => (
         <NpcMesh key={npc.id} npc={npc} />
       ))}
-      {/* DEBUG: chỉ render device-placeholder (procedural) + agent-placeholder (Robot) */}
-      {/* DEBUG: chỉ 1 placeholder citizen */}
-      {citizens
-        .filter(c => c.citizen_id === "human-plaza-01")
-        .map((citizen) => (
-          <CitizenMesh key={citizen.citizen_id} citizen={citizen} />
-        ))}
+      {citizens.map((citizen) => (
+        <CitizenMesh key={citizen.citizen_id} citizen={citizen} />
+      ))}
     </group>
   );
 }
@@ -1524,7 +2186,7 @@ export function CampusScene() {
       >
         <color attach="background" args={[artDirection.world.sky]} />
         <fog attach="fog" args={[artDirection.world.fog, artDirection.world.fogNear, artDirection.world.fogFar]} />
-        <PerspectiveCamera makeDefault position={[1.5, 26, 28]} fov={48} />
+        <PerspectiveCamera makeDefault position={[12.5, 19.6, 17.8]} fov={48} />
         <ambientLight color={artDirection.lighting.ambient.color} intensity={artDirection.lighting.ambient.intensity} />
         <directionalLight
           castShadow
@@ -1552,6 +2214,9 @@ export function CampusScene() {
           minDistance={10}
           maxDistance={40}
           maxPolarAngle={Math.PI / 2.4}
+          enableRotate={false}
+          enableZoom={false}
+          enablePan={false}
         />
       </Canvas>
     </div>
