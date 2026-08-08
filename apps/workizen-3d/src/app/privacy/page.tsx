@@ -78,8 +78,9 @@ export default function PrivacyPage() {
         Deleting your account and data
       </h2>
       <p className="rounded-lg border-l-4 border-blue-600 bg-blue-50 p-4">
-        <strong>Account deletion request — Workizen: AI Personal Hub</strong>{" "}
-        (<code>ai.workizen.wallet</code>). You can erase everything on your device
+        <strong>Account deletion request — Workizen</strong>, the Android and
+        iOS app published by <strong>Workizen Labs</strong> (
+        <code>ai.workizen.wallet</code>). You can erase everything on your device
         yourself, at any time, without waiting for approval.
       </p>
 
