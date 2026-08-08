@@ -57,6 +57,37 @@ export default function PrivacyPage() {
         or where required by law.
       </p>
 
+      <h2 id="advertising-analytics" className="pt-3 text-xl font-bold text-slate-900">
+        Advertising &amp; analytics
+      </h2>
+      <p>
+        The Workizen mobile app includes Google&nbsp;AdMob (advertising) and Google
+        Analytics for Firebase together with Crashlytics (product analytics and
+        crash reporting).
+      </p>
+      <ul className="list-disc space-y-2 pl-6">
+        <li>
+          <strong>Advertising.</strong> When ads are shown, Google AdMob may read
+          your device&rsquo;s <strong>advertising ID</strong> and information about
+          ad interactions in order to serve and measure ads. This data goes to
+          Google, not to us. We restrict every ad request to Google&rsquo;s
+          general-audience content rating: no gambling and no adult content. You
+          can reset or delete your advertising ID at any time in your device
+          settings.
+        </li>
+        <li>
+          <strong>Analytics &amp; crash reports.</strong> We collect app-usage
+          events and crash diagnostics to understand which features are used and
+          to fix defects. These are about how the app behaves &mdash; never the
+          contents of your documents, chats or notes.
+        </li>
+      </ul>
+      <p>
+        <strong>What this never includes:</strong> your documents, scans, chat
+        messages, notes or API keys. Those stay on your device and are covered by
+        the sections above. We monetize the product, never your documents.
+      </p>
+
       <h2 className="pt-3 text-xl font-bold text-slate-900">Data retention &amp; security</h2>
       <p>
         We retain information only as long as needed to operate the Services and meet legal
