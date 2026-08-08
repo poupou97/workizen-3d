@@ -36,6 +36,20 @@ if [[ "$BRANCH" != "main" || -n "$DIRTY" ]]; then
   echo "  → WZ_DEPLOY_ANY_BRANCH=1: vẫn tiếp tục."
 fi
 
+# `main` sạch vẫn chưa đủ: `main` CỤC BỘ có thể cũ hơn origin. `git switch main`
+# mà quên `pull` là deploy bản cũ, và --delete xoá đúng những gì vừa lên remote.
+# Cùng một lớp lỗi: deploy thứ không phải nguồn sự thật.
+git -C "$REPO_ROOT" fetch -q origin main 2>/dev/null || true
+LOCAL="$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || echo l)"
+REMOTE="$(git -C "$REPO_ROOT" rev-parse origin/main 2>/dev/null || echo r)"
+if [[ "$LOCAL" != "$REMOTE" ]]; then
+  BEHIND="$(git -C "$REPO_ROOT" rev-list --count HEAD..origin/main 2>/dev/null || echo '?')"
+  echo "✗ TỪ CHỐI deploy — 'main' cục bộ không khớp origin/main."
+  echo "  cục bộ: ${LOCAL:0:8}   origin: ${REMOTE:0:8}   (thiếu $BEHIND commit)"
+  echo "  Chạy: git pull --ff-only origin main"
+  [[ "${WZ_DEPLOY_ANY_BRANCH:-}" == "1" ]] || exit 1
+fi
+
 echo "==> Syncing app source to $VM_HOST:$VM_DIR ..."
 rsync -avz --delete \
   --exclude=node_modules \
