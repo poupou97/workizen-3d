@@ -180,10 +180,10 @@ export default function TongtaiPrivacyPage() {
         <li>
           Gửi email tới{" "}
           <a
-            href="mailto:privacy@workizen.net?subject=Yeu%20cau%20xoa%20du%20lieu%20-%20Tong%20Tai"
+            href="mailto:workizen.labs@gmail.com?subject=Yeu%20cau%20xoa%20du%20lieu%20-%20Tong%20Tai"
             className="font-semibold text-blue-700 underline"
           >
-            privacy@workizen.net
+            workizen.labs@gmail.com
           </a>{" "}
           với tiêu đề &ldquo;Yêu cầu xoá dữ liệu — Tổng Tài&rdquo;.
         </li>
@@ -233,10 +233,10 @@ export default function TongtaiPrivacyPage() {
       <p>
         <strong>Liên hệ / Contact:</strong>{" "}
         <a
-          href="mailto:privacy@workizen.net"
+          href="mailto:workizen.labs@gmail.com"
           className="font-semibold text-blue-700 underline"
         >
-          privacy@workizen.net
+          workizen.labs@gmail.com
         </a>
       </p>
     </LegalLayout>

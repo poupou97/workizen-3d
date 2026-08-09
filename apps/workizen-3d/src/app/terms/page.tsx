@@ -55,8 +55,8 @@ export default function TermsPage() {
       <h2 className="pt-3 text-xl font-bold text-slate-900">Contact</h2>
       <p>
         Questions about these Terms can be sent to{" "}
-        <a className="font-semibold text-blue-700 hover:text-blue-900" href="mailto:hello@workizen.net">
-          hello@workizen.net
+        <a className="font-semibold text-blue-700 hover:text-blue-900" href="mailto:workizen.labs@gmail.com">
+          workizen.labs@gmail.com
         </a>
         .
       </p>

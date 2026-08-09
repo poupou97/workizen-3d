@@ -99,8 +99,8 @@ export default function PrivacyPage() {
       <p>
         Depending on your location, you may have rights to access, correct, or delete your
         personal information. To make a request, contact{" "}
-        <a className="font-semibold text-blue-700 hover:text-blue-900" href="mailto:privacy@workizen.net">
-          privacy@workizen.net
+        <a className="font-semibold text-blue-700 hover:text-blue-900" href="mailto:workizen.labs@gmail.com">
+          workizen.labs@gmail.com
         </a>
         .
       </p>
@@ -146,9 +146,9 @@ export default function PrivacyPage() {
           Email{" "}
           <a
             className="font-semibold text-blue-700 underline hover:text-blue-900"
-            href="mailto:privacy@workizen.net?subject=Account%20deletion%20request%20-%20Workizen%20Hub"
+            href="mailto:workizen.labs@gmail.com?subject=Account%20deletion%20request%20-%20Workizen%20Hub"
           >
-            privacy@workizen.net
+            workizen.labs@gmail.com
           </a>{" "}
           with the subject &ldquo;Account deletion request — Workizen Hub&rdquo;,
           from the address you signed up with.
@@ -180,8 +180,8 @@ export default function PrivacyPage() {
       <h2 className="pt-3 text-xl font-bold text-slate-900">Contact</h2>
       <p>
         Questions about this policy can be sent to{" "}
-        <a className="font-semibold text-blue-700 hover:text-blue-900" href="mailto:privacy@workizen.net">
-          privacy@workizen.net
+        <a className="font-semibold text-blue-700 hover:text-blue-900" href="mailto:workizen.labs@gmail.com">
+          workizen.labs@gmail.com
         </a>
         .
       </p>
