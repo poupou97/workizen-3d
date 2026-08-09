@@ -24,8 +24,8 @@ export default function ContactPage() {
         </div>
         <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
           <p className="text-xs font-black uppercase tracking-wide text-slate-500">Privacy</p>
-          <a className="font-semibold text-blue-700 hover:text-blue-900" href="mailto:privacy@workizen.net">
-            privacy@workizen.net
+          <a className="font-semibold text-blue-700 hover:text-blue-900" href="mailto:workizen.labs@gmail.com">
+            workizen.labs@gmail.com
           </a>
         </div>
         <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
