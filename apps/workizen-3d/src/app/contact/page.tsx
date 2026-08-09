@@ -1,44 +1,24 @@
 import type { Metadata } from "next";
 import { LegalLayout } from "@/components/legal/LegalLayout";
+import { ContactContent } from "./ContactContent";
 
 export const metadata: Metadata = {
-  title: "Contact — Workizen",
-  description: "How to reach the Workizen team for support, privacy, and general inquiries.",
+  title: "Contact & Support — Workizen",
+  description:
+    "How to reach the Workizen team for app support, privacy requests, and security reports. Available in 14 languages.",
   alternates: { canonical: "/contact" },
 };
 
+/**
+ * Trang hỗ trợ — địa chỉ này được khai làm **Support URL** cho cả 14 locale
+ * trên App Store và Google Play. Nội dung nằm ở `ContactContent` (client) vì
+ * nó tự chọn ngôn ngữ theo trình duyệt; phần vỏ giữ nguyên server component
+ * để metadata vẫn được render tĩnh và crawl được.
+ */
 export default function ContactPage() {
   return (
-    <LegalLayout title="Contact Us">
-      <p>
-        We&rsquo;d like to hear from you. Workizen is a software product operated by the
-        Workizen team. Please use the appropriate address below and we will respond as soon
-        as we can.
-      </p>
-      <div className="mt-2 grid gap-3">
-        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-          <p className="text-xs font-black uppercase tracking-wide text-slate-500">General</p>
-          <a className="font-semibold text-blue-700 hover:text-blue-900" href="mailto:hello@workizen.net">
-            hello@workizen.net
-          </a>
-        </div>
-        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-          <p className="text-xs font-black uppercase tracking-wide text-slate-500">Privacy</p>
-          <a className="font-semibold text-blue-700 hover:text-blue-900" href="mailto:privacy@workizen.net">
-            privacy@workizen.net
-          </a>
-        </div>
-        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-          <p className="text-xs font-black uppercase tracking-wide text-slate-500">Security</p>
-          <a className="font-semibold text-blue-700 hover:text-blue-900" href="mailto:security@workizen.net">
-            security@workizen.net
-          </a>
-        </div>
-      </div>
-      <p className="mt-4 text-sm text-slate-500">
-        Workizen operates online. A registered business mailing address will be published here
-        as the company is formally incorporated.
-      </p>
+    <LegalLayout title="Contact">
+      <ContactContent />
     </LegalLayout>
   );
 }
